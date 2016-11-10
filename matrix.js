@@ -8,7 +8,7 @@
    * @desc Creates a `Matrix` from the supplied arguments.
    **/
   function Matrix (data, options) {
-    this.type = Float64Array;
+    this.type = Matrix.defaultType;
     this.shape = [];
 
     if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
@@ -26,6 +26,14 @@
     }
   }
 
+  /**
+   * Default type for data
+   **/
+  Matrix.defaultType = Float64Array;
+
+  /**
+   *
+   **/
   Matrix.fromTypedArray = function (data, shape) {
     if (data.length !== shape[0] * shape[1])
       throw new Error("Shape does not match typed array dimensions.");
@@ -38,10 +46,13 @@
     return self;
   };
 
+  /**
+   *
+   **/
   Matrix.fromArray = function (array) {
     var r = array.length, // number of rows
         c = array[0].length,  // number of columns
-        data = new Float64Array(r * c);
+        data = new Matrix.defaultType(r * c);
 
     var i, j;
     for (i = 0; i < r; ++i)
@@ -186,7 +197,7 @@
     if (i <= 0 || j <= 0)
       throw new Error('invalid size');
 
-    type = type || Float64Array;
+    type = type || Matrix.defaultType;
 
     var data = new type(i * j),
         k;
@@ -208,7 +219,7 @@
     if (i <= 0 || j <= 0)
       throw new Error('invalid size');
 
-    type = type || Float64Array;
+    type = type || Matrix.defaultType;
 
     var data = new type(i * j),
         k = 0;
@@ -224,15 +235,15 @@
    * which should be an instance of `TypedArray`.
    * @param {Number} i
    * @param {Number} j
+   * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
-   * @param {Number} standard deviation (default 1)
    * @param {TypedArray} type
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
   Matrix.random = function (i, j, deviation, mean, type) {
     deviation = deviation || 1;
     mean = mean || 0;
-    type = type || Float64Array;
+    type = type || Matrix.defaultType;
     var data = new type(i * j),
         k;
 
@@ -240,6 +251,89 @@
       data[k] = deviation * Math.random() + mean;
 
     return Matrix.fromTypedArray(data, [i, j]);
+  };
+
+  /**
+   * Static method. Creates an `i x j` matrix containing random values
+   * according to a normal (Gaussian) distribution, takes an optional `type` argument
+   * which should be an instance of `TypedArray`.
+   * https://en.wikipedia.org/wiki/Normal_distribution
+   * @param {Number} rows
+   * @param {Number} cols
+   * @param {Number} deviation (default 1)
+   * @param {Number} mean (default 0)
+   * @param {TypedArray} type
+   * @returns {Matrix} a matrix of the specified dimensions and `type`
+   **/
+  Matrix.randomNormal = function(i, j, deviation, mean, type) {
+    return Matrix._randomNormal1(i, j, deviation, mean, type);
+    //return Matrix._randomNormal2(i, j, deviation, mean, type);
+  }
+
+  //Uses Box–Muller method
+  //https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+  Matrix._randomNormal1 = function(m, n, deviation, mean, type) {
+    deviation = deviation || 1.0;
+    mean = mean || 0.0;
+    type = type || Matrix.defaultType;
+    var size = m * n;
+    var data = new type(size);
+    var k = 0;
+    var u1, u2, 
+      a, b0, b1, z0, z1;
+
+    do {
+      do {
+        u1 = Math.random();
+      } while ( u1 <= Number.EPSILON );
+      u2 = Math.random();
+      a = Math.sqrt( -2.0 * Math.log( u1 ) );
+      b0 = Math.cos( 2.0 * Math.PI * u2 );
+      b1 = Math.sin( 2.0 * Math.PI * u2 );
+      z0 = (a * b0) * deviation + mean;
+      z1 = (a * b1) * deviationdeviation + mean;
+      data[k] = z0;
+      k++;
+      if (k < size) {
+        data[k] = z1;
+        k++;
+      }
+    } while(k < size);
+
+    return Matrix.fromTypedArray(data, [m, n]);
+  };
+
+  //Uses Marsaglia polar method
+  //https://en.wikipedia.org/wiki/Marsaglia_polar_method
+  Matrix._randomNormal2 = function(m, n, deviation, mean, type) {
+    deviation = deviation || 1.0;
+    mean = mean || 0.0;
+    type = type || Matrix.defaultType;
+    var size = m * n;
+    var data = new type(size);
+    var k = 0;
+    var u, v, s, 
+      mul, spare, z0, z1;
+
+    do {
+      do {
+        u = Math.random() * 2 - 1;
+        v = Math.random() * 2 - 1;
+              s = u * u + v * v;
+      } while ( s >= 1 || s == 0 );
+      mul = Math.sqrt( -2.0 * Math.log(s) / s );
+      spare = v * mul;
+      z0 = mean + deviation * u * mul;
+      z1 = mean + deviation * spare;
+      data[k] = z0;
+      k++;
+      if (k < size) {
+        data[k] = z1;
+        k++;
+      }
+    } while(k < size);
+
+    return Matrix.fromTypedArray(data, [m, n]);
   };
 
   /**
@@ -598,7 +692,7 @@
     if (size < 0)
       throw new Error('invalid size');
 
-    type = type || Float64Array;
+    type = type || Matrix.defaultType;
     var matrix = Matrix.zeros(size, size, type),
         i, j;
     for (i = 0; i < size; i++)
@@ -622,7 +716,7 @@
       return (x + y * 2 + 1) % n;
     }
 
-    type = type || Float64Array;
+    type = type || Matrix.defaultType;
     var data = new type(size * size),
         i, j;
     for (i = 0; i < size; i++)
