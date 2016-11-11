@@ -19,7 +19,7 @@
       this.data = new this.type(data);
       this.length = data.length;
     } else if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
-      return Vector.fromTypedArray(data, options.length);
+      return Vector.fromTypedArray(data, options && options.length ? options.length : data.length);
     }
   }
 
