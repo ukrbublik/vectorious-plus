@@ -1,4 +1,4 @@
-//(function () {
+(function () {
   'use strict';
 
   var Vector = require('./vector');
@@ -1087,4 +1087,4 @@
     window.Matrix = Matrix;
   } catch (e) {}
 
-//}());
+}());
