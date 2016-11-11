@@ -5,7 +5,7 @@
    * @method constructor
    * @desc Creates a two-dimensional `Vector` from the supplied arguments.
    **/
-  function Vector (data) {
+  function Vector (data, options) {
     this.type = Vector.defaultType;
     this.length = 0;
 
@@ -19,9 +19,7 @@
       this.data = new this.type(data);
       this.length = data.length;
     } else if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
-      this.data = data;
-      this.length = data.length;
-      this.type = data.constructor;
+      return Vector.fromTypedArray(data, options.length);
     }
   }
 
@@ -29,6 +27,23 @@
    * Default type for data
    **/
   Vector.defaultType = Float64Array;
+
+  /**
+   *
+   **/
+  Vector.fromTypedArray = function (data, length) {
+    if (length === undefined)
+      length = data.length;
+    if (length > data.length)
+      throw new Error("Vector length > array length.");
+
+    var self = Object.create(Vector.prototype);
+    self.data = data;
+    self.length = length;
+    self.type = data.constructor;
+
+    return self;
+  };
 
   /**
    * Static method. Adds two vectors `a` and `b` together.
@@ -275,28 +290,23 @@
   };
 
   /**
-   * Static method. Creates a vector of `count` elements containing random
-   * values according to a normal (Gaussian) distribution, takes an optional `type`
-   * argument which should be an instance of `TypedArray`.
+   * Fills vector with random values according to a normal (Gaussian) distribution
    * https://en.wikipedia.org/wiki/Normal_distribution
-   * @param {Number} count
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
-   * @param {TypedArray} type
-   * @returns {Vector} a new vector of the specified size and `type`
    **/
-  Vector.randomNormal = function (count, deviation, mean, type) {
-    return Vector._randomNormal1(count, deviation, mean, type);
-    //return Vector._randomNormal2(count, deviation, mean, type);
+  Vector.prototype.randomNormal = function (count, deviation, mean, type) {
+    this._randomNormal1(deviation, mean);
+    //this._randomNormal2(deviation, mean);
   };
 
   //Uses Box–Muller method
   //https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-  Vector._randomNormal1 = function(count, deviation, mean, type) {
+  Vector._randomNormal1 = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
-    type = type || Vector.defaultType;
-    var data = new type(count);
+    var data = this.data,
+      dataOffset = this.dataOffset;
     var u1, u2, 
       a, b0, b1, z0, z1;
 
@@ -310,22 +320,20 @@
       b1 = Math.sin( 2.0 * Math.PI * u2 );
       z0 = (a * b0) * deviation + mean;
       z1 = (a * b1) * deviation + mean;
-      data[x] = z0;
+      data[dataOffset + x] = z0;
       x++;
       if (x < count)
-        data[x] = z1;
+        data[dataOffset + x] = z1;
     }
-
-    return new Vector(data);
   };
 
   //Uses Marsaglia polar method
   //https://en.wikipedia.org/wiki/Marsaglia_polar_method
-  Vector._randomNormal2 = function(count, deviation, mean, type) {
+  Vector._randomNormal2 = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
-    type = type || Vector.defaultType;
-    var data = new type(count);
+    var data = this.data,
+      dataOffset = this.dataOffset;
     var u, v, s, 
       mul, spare, z0, z1;
 
@@ -339,13 +347,11 @@
       spare = v * mul;
       z0 = mean + deviation * u * mul;
       z1 = mean + deviation * spare;
-      data[x] = z0;
+      data[dataOffset + x] = z0;
       x++;
       if (x < count)
-        data[x] = z1;
+        data[dataOffset + x] = z1;
     }
-
-    return new Vector(data);
   };
 
   /**

@@ -1,4 +1,4 @@
-(function () {
+//(function () {
   'use strict';
 
   var Vector = require('./vector');
@@ -35,8 +35,8 @@
    *
    **/
   Matrix.fromTypedArray = function (data, shape) {
-    if (data.length !== shape[0] * shape[1])
-      throw new Error("Shape does not match typed array dimensions.");
+    if (shape[0] * shape[1] > data.length)
+      throw new Error("Matrix shape > array dimensions.");
 
     var self = Object.create(Matrix.prototype);
     self.shape = shape;
@@ -87,8 +87,8 @@
     if (r !== matrix.shape[0] || c !== matrix.shape[1])
       throw new Error('sizes do not match!');
 
-    var i;
-    for (i = 0; i < r * c; i++)
+    var i, size = r * c;
+    for (i = 0; i < size; i++)
       d1[i] += d2[i];
 
     return this;
@@ -119,8 +119,8 @@
       if (r !== matrix.shape[0] || c !== matrix.shape[1])
         throw new Error('sizes do not match');
 
-      var i;
-      for (i = 0; i < r * c; i++)
+      var i, size = r * c;
+      for (i = 0; i < size; i++)
         d1[i] -= d2[i];
 
       return this;
@@ -145,9 +145,10 @@
     var r = this.shape[0],          // rows in this matrix
         c = this.shape[1],          // columns in this matrix
         d1 = this.data,
-        i;
+        i, 
+        size = r * c;
 
-    for (i = 0; i < r * c; i++)
+    for (i = 0; i < size; i++)
       d1[i] *= scalar;
 
     return this;
@@ -177,9 +178,10 @@
         c = this.shape[1],          // columns in this matrix
         d1 = this.data,
         d2 = matrix.data,
-        i;
+        i, 
+        size = r * c;
 
-    for (i = 0; i < r * c; i++)
+    for (i = 0; i < size; i++)
       d1[i] *= d2[i];
 
     return this;
@@ -200,11 +202,25 @@
     type = type || Matrix.defaultType;
 
     var data = new type(i * j),
-        k;
-    for (k = 0; k < i * j; k++)
+        k,
+        size = i * j;
+    for (k = 0; k < size; k++)
       data[k] = +0.0;
 
     return Matrix.fromTypedArray(data, [i, j]);
+  };
+
+  /**
+   * Fills matrix with 0
+   */
+  Matrix.prototype.zeros = function() {
+    var r = this.shape[0],
+        c = this.shape[1],
+        data = this.data,
+        k,
+        size = r * c;
+    for (k = 0; k < size; k++)
+      data[k] = +0.0;
   };
 
   /**
@@ -222,11 +238,63 @@
     type = type || Matrix.defaultType;
 
     var data = new type(i * j),
-        k = 0;
-    for (k = 0; k < i * j; k++)
+        k = 0,
+        size = i * j;
+    for (k = 0; k < size; k++)
       data[k] = +1.0;
 
     return Matrix.fromTypedArray(data, [i, j]);
+  };
+
+  /**
+   * Fills matrix with 1
+   */
+  Matrix.prototype.ones = function() {
+    var r = this.shape[0],
+        c = this.shape[1],
+        data = this.data,
+        k,
+        size = r * c;
+    for (k = 0; k < size; k++)
+      data[k] = +1.0;
+  };
+
+  /**
+   * Static method. Creates an `i x j` identity matrix, takes an
+   * optional `type` argument which should be an instance of `TypedArray`.
+   * @param {Number} i
+   * @param {Number} j
+   * @param {TypedArray} type
+   * @returns {Matrix} a matrix of the specified dimensions and `type`
+   **/
+  Matrix.eye = function (i, j, type) {
+    if (i <= 0 || j <= 0)
+      throw new Error('invalid size');
+
+    type = type || Matrix.defaultType;
+
+    var data = new type(i * j),
+        i, j,
+        size = i * j;
+    for (i = 0; i < r; i++)
+      for (j = 0; j < c; j++)
+        data[i * c + j] = i == j ? +1.0 : +0.0;
+
+    return Matrix.fromTypedArray(data, [i, j]);
+  };
+
+  /**
+   * Fills matrix with 1 by diagonal, other with 0 (identity matrix)
+   */
+  Matrix.prototype.eye = function() {
+    var r = this.shape[0],
+        c = this.shape[1],
+        data = this.data,
+        i, j,
+        size = r * c;
+    for (i = 0; i < r; i++)
+      for (j = 0; j < c; j++)
+        data[i * c + j] = i == j ? +1.0 : +0.0;
   };
 
   /**
@@ -245,39 +313,33 @@
     mean = mean || 0;
     type = type || Matrix.defaultType;
     var data = new type(i * j),
-        k;
+        k,
+        size = i * j;
 
-    for (k = 0; k < i * j; k++)
+    for (k = 0; k < size; k++)
       data[k] = deviation * Math.random() + mean;
 
     return Matrix.fromTypedArray(data, [i, j]);
   };
 
   /**
-   * Static method. Creates an `i x j` matrix containing random values
-   * according to a normal (Gaussian) distribution, takes an optional `type` argument
-   * which should be an instance of `TypedArray`.
+   * Fills matrix with random values according to a normal (Gaussian) distribution
    * https://en.wikipedia.org/wiki/Normal_distribution
-   * @param {Number} rows
-   * @param {Number} cols
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
-   * @param {TypedArray} type
-   * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
-  Matrix.randomNormal = function(i, j, deviation, mean, type) {
-    return Matrix._randomNormal1(i, j, deviation, mean, type);
-    //return Matrix._randomNormal2(i, j, deviation, mean, type);
+  Matrix.prototype.randomNormal = function(deviation, mean) {
+    this._randomNormal1(deviation, mean);
+    //this._randomNormal2(deviation, mean);
   }
 
   //Uses Box–Muller method
   //https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-  Matrix._randomNormal1 = function(m, n, deviation, mean, type) {
+  Matrix.prototype._randomNormal1 = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
-    type = type || Matrix.defaultType;
-    var size = m * n;
-    var data = new type(size);
+    var size = this.shape[0] * this.shape[1];
+    var data = this.data;
     var k = 0;
     var u1, u2, 
       a, b0, b1, z0, z1;
@@ -291,7 +353,7 @@
       b0 = Math.cos( 2.0 * Math.PI * u2 );
       b1 = Math.sin( 2.0 * Math.PI * u2 );
       z0 = (a * b0) * deviation + mean;
-      z1 = (a * b1) * deviationdeviation + mean;
+      z1 = (a * b1) * deviation + mean;
       data[k] = z0;
       k++;
       if (k < size) {
@@ -299,18 +361,15 @@
         k++;
       }
     } while(k < size);
-
-    return Matrix.fromTypedArray(data, [m, n]);
   };
 
   //Uses Marsaglia polar method
   //https://en.wikipedia.org/wiki/Marsaglia_polar_method
-  Matrix._randomNormal2 = function(m, n, deviation, mean, type) {
+  Matrix._randomNormal2 = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
-    type = type || Matrix.defaultType;
-    var size = m * n;
-    var data = new type(size);
+    var size = this.shape[0] * this.shape[1];
+    var data = this.data;
     var k = 0;
     var u, v, s, 
       mul, spare, z0, z1;
@@ -332,8 +391,6 @@
         k++;
       }
     } while(k < size);
-
-    return Matrix.fromTypedArray(data, [m, n]);
   };
 
   /**
@@ -810,8 +867,8 @@
     if (r !== matrix.shape[0] || c !== matrix.shape[1] || this.type !== matrix.type)
       return false;
 
-    var i;
-    for (i = 0; i < r * c; i++)
+    var i, size = r * c;
+    for (i = 0; i < size; i++)
       if (d1[i] !== d2[i])
         return false;
 
@@ -878,9 +935,10 @@
         c = this.shape[1],
         mapped = new Matrix(this),
         data = mapped.data,
-        i;
+        i, 
+        size = r * c;
 
-    for (i = 0; i < r * c; i++)
+    for (i = 0; i < size; i++)
       data[i] = callback.call(mapped, data[i], i / c | 0, i % c, data);
 
     return mapped;
@@ -895,9 +953,10 @@
   Matrix.prototype.each = function (callback) {
     var r = this.shape[0],
         c = this.shape[1],
-        i;
+        i, 
+        size = r * c;
 
-    for (i = 0; i < r * c; i++)
+    for (i = 0; i < size; i++)
       callback.call(this, this.data[i], i / c | 0, i % c);
 
     return this;
@@ -917,9 +976,10 @@
       throw new Error('Reduce of empty matrix with no initial value.');
 
     var i = 0,
-        value = initialValue || this.data[i++];
+        value = initialValue || this.data[i++], 
+        size = r * c;
 
-    for (; i < r * c; i++)
+    for (; i < size; i++)
       value = callback.call(this, value, this.data[i], i / c | 0, i % c);
     return value;
   };
@@ -1026,4 +1086,5 @@
   try {
     window.Matrix = Matrix;
   } catch (e) {}
-}());
+
+//}());
