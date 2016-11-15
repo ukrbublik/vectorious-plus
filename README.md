@@ -3,8 +3,10 @@
 ![version](https://img.shields.io/npm/v/vectorious-plus.svg?style=flat&label=version) ![travis](https://img.shields.io/travis/ukrbublik/vectorious-plus.svg?style=flat)
 ![climate](https://img.shields.io/codeclimate/github/mateogianolio/vectorious.svg?style=flat&label=climate) ![coverage](https://img.shields.io/codeclimate/coverage/github/mateogianolio/vectorious.svg?style=flat&label=coverage)
 
-> A high performance linear algebra library, written in JavaScript and optimized with C++ bindings to [BLAS](http://www.netlib.org/blas/), [SPBLAS](http://math.nist.gov/spblas/), [LAPACK](https://software.intel.com/ru-ru/node/468874).
-> Forked from [mateogianolio/vectorious](https://github.com/mateogianolio/vectorious), added sparse matrix/vector support and boost of AX=B solve (by using LAPACK).
+> A high performance linear algebra library, written in JavaScript and optimized with C++ bindings to [BLAS](http://www.netlib.org/blas/), [SPBLAS](http://math.nist.gov/spblas/), [LAPACK](https://software.intel.com/ru-ru/node/468874).<br>
+> Forked from [mateogianolio/vectorious](https://github.com/mateogianolio/vectorious), added sparse matrix/vector support (by using SPBLAS, nodejs only) and boost of AX=B solve (by using LAPACK).<br>
+<b>todo: documment new featues</b><br>
+> Also see [nblas-plus](https://github.com/ukrbublik/nblas-plus)
 
 ### Usage
 
