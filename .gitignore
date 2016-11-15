@@ -3,3 +3,4 @@ coverage
 .DS_Store
 benchmarks/bigvector.js
 benchmarks/bigmatrix.js
+npm-debug.log

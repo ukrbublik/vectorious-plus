@@ -2,7 +2,17 @@ language: node_js
 node_js:
   - "4.0"
 before_install:
-  - sudo apt-get install libblas-dev
+  - sudo apt-get install libblas*
+  - sudo apt-get install liblapack*
+  - sudo apt-get install libgsl0-dev
+  - wget http://www.netlib.org/lapack/lapack-3.6.1.tgz
+  - tar xf lapack-3.6.1.tgz
+  - cd lapack-3.6.1/
+  - cmake -DCMAKE_INSTALL_PREFIX=/usr -DLAPACKE=ON -DCBLAS=ON -DBUILD_SHARED_LIBS=ON  .
+  - sudo make install -j2
+  - cd ..
+install:
+  - npm install
 env:
   - CXX=g++-4.8
 addons:
@@ -11,7 +21,10 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    - george-edison55-precise-backports # cmake
     packages:
     - gcc-4.8
     - g++-4.8
     - clang
+    - cmake-data
+    - gfortran
