@@ -1,30 +1,39 @@
 ![vectorious](https://github.com/mateogianolio/vectorious/raw/master/logo.gif)
 
-![version](https://img.shields.io/npm/v/vectorious.svg?style=flat&label=version) ![travis](https://img.shields.io/travis/mateogianolio/vectorious.svg?style=flat)
+![version](https://img.shields.io/npm/v/vectorious-plus.svg?style=flat&label=version) ![travis](https://img.shields.io/travis/ukrbublik/vectorious-plus.svg?style=flat)
 ![climate](https://img.shields.io/codeclimate/github/mateogianolio/vectorious.svg?style=flat&label=climate) ![coverage](https://img.shields.io/codeclimate/coverage/github/mateogianolio/vectorious.svg?style=flat&label=coverage)
 
-> A high performance linear algebra library, written in JavaScript and optimized with C++ bindings to [BLAS](http://www.netlib.org/blas/).
+> A high performance linear algebra library, written in JavaScript and optimized with C++ bindings to [BLAS](http://www.netlib.org/blas/), [SPBLAS](http://math.nist.gov/spblas/), [LAPACK](https://software.intel.com/ru-ru/node/468874).
+> Forked from [mateogianolio/vectorious](https://github.com/mateogianolio/vectorious), added sparse matrix/vector support and boost of AX=B solve (by using LAPACK).
 
 ### Usage
 
 ##### In node.js
 
 ```bash
-$ npm install vectorious
+$ npm install vectorious-plus
 ```
 
 ```javascript
 var v = require('vectorious'),
     Matrix = v.Matrix,
     Vector = v.Vector,
-    BLAS = v.BLAS; // access BLAS routines
+    SpVector = v.SpVector,
+    SpMatrix = v.Matrix,
+    BLAS = v.BLAS; // access BLAS routines (and also SPBLAS, LAPACK)
 ```
 
 Will use your local BLAS copy (if any). Some notes for different operating systems:
 
 * **OSX** - by default included in the Accelerate framework
-* **Debian/Ubuntu** - different options, easiest is to `apt-get install libblas-dev`
 * **Windows** - https://icl.cs.utk.edu/lapack-for-windows/
+* **Debian/Ubuntu** - 
+```bash
+$ sudo apt-get install libblas-dev
+$ sudo apt-get install libgsl0-dev
+$ sudo apt-get install liblapacke-dev
+```
+Tested on Ubuntu.
 
 ##### In browser
 
