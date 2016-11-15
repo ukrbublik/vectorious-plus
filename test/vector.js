@@ -2,7 +2,8 @@
   'use strict';
 
   var assert = require('assert'),
-      Vector = require('../vector');
+      Vector = require('../vector'),
+      Matrix = require('../matrix');
 
   describe('Vector', function() {
     describe('Vector.add(a, b)', function() {
@@ -364,6 +365,21 @@
           assert.deepEqual([1, 2, 3], new Vector([1, 2, 3]).toArray());
         });
       });
+
+      describe('.solvedSquare()', function() {
+        it('should work as expected', function() {
+          // 2*2 x 2*1 = 2*1
+          var a = new Matrix([[1, 2], [3, 4]]);
+          var x = new Vector([5, 6]);
+          var b = new Vector([17, 39]);
+          b.solvedSquare(a);
+          for (var i = 0 ; i < b.data.length ; i++) {
+            b.data[i] = b.data[i].toFixed(2);
+          }
+          assert.deepEqual(b, x);
+        });
+      });
+
     });
   });
 })();

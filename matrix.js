@@ -262,6 +262,7 @@
   /**
    * Static method. Creates an `i x j` identity matrix, takes an
    * optional `type` argument which should be an instance of `TypedArray`.
+   * Alias for identity()
    * @param {Number} i
    * @param {Number} j
    * @param {TypedArray} type
@@ -320,6 +321,25 @@
       data[k] = deviation * Math.random() + mean;
 
     return Matrix.fromTypedArray(data, [i, j]);
+  };
+
+  /**
+   * Static method. Creates an `i x j` matrix containing random values
+   * according to a normal (Gaussian) distribution, takes an optional `type` argument
+   * which should be an instance of `TypedArray`.
+   * @param {Number} i
+   * @param {Number} j
+   * @param {Number} deviation (default 1)
+   * @param {Number} mean (default 0)
+   * @param {TypedArray} type
+   * @returns {Matrix} a matrix of the specified dimensions and `type`
+   **/
+  Matrix.randomNormal = function (i, j, deviation, mean, type) {
+    type = type || Matrix.defaultType;
+    var data = new type(i * j);
+    var m = Matrix.fromTypedArray(data, [i, j]);
+    m.randomNormal(deviation, mean);
+    return m;
   };
 
   /**
@@ -395,21 +415,25 @@
 
   /**
    * Static method. Multiplies two matrices `a` and `b` of matching dimensions.
-   * @param {Matrix} a
-   * @param {Matrix} b
-   * @returns {Matrix} a new resultant matrix containing the matrix product of `a` and `b`
+   * @param {Matrix} a, size m x n
+   * @param {Matrix} b, size n x k
+   * @param {Matrix} c optional, matrix with size m x k to hold result of product of `a` and `b`
+   *    If not present, will be created
+   * @returns {Matrix} a new resultant matrix with size m x k containing the matrix product of `a` and `b`
    **/
-  Matrix.multiply = function (a, b) {
-    return a.multiply(b);
+  Matrix.multiply = function (a, b, c) {
+    return a.multiply(b, c);
   };
 
   /**
    * Multiplies two matrices `a` and `b` of matching dimensions.
-   * @param {Matrix} a
-   * @param {Matrix} b
-   * @returns {Matrix} a new resultant matrix containing the matrix product of `a` and `b`
+   * this - matrix of size m x n
+   * @param {Matrix} matrix of size n x k
+   * @param {Matrix} res optional, matrix with size m x k to hold result of product of `a` and `b`
+   *    If not present, will be created
+   * @returns {Matrix} resultant matrix with size m x k containing the matrix product of `a` and `b`
    **/
-  Matrix.prototype.multiply = function (matrix) {
+  Matrix.prototype.multiply = function (matrix, res) {
     var r1 = this.shape[0],   // rows in this matrix
         c1 = this.shape[1],   // columns in this matrix
         r2 = matrix.shape[0], // rows in multiplicand
@@ -420,8 +444,9 @@
     if (c1 !== r2)
       throw new Error('sizes do not match');
 
-    var data = new this.type(r1 * c2),
-        i, j, k,
+    if (res === undefined)
+      res = Matrix.fromTypedArray(new this.type(r1 * c2), [r1, c2]);
+    var i, j, k,
         sum;
     for (i = 0; i < r1; i++) {
       for (j = 0; j < c2; j++) {
@@ -429,11 +454,11 @@
         for (k = 0; k < c1; k++)
           sum += d1[i * c1 + k] * d2[j + k * c2];
 
-        data[i * c2 + j] = sum;
+        res.data[i * c2 + j] = sum;
       }
     }
 
-    return Matrix.fromTypedArray(data, [r1, c2]);
+    return res;
   };
 
   /**
@@ -456,6 +481,21 @@
         data[j * r + i] = this.data[i * c + j];
 
     return Matrix.fromTypedArray(data, [c, r]);
+  };
+
+  Matrix.prototype.transposed = function () {
+    var r = this.shape[0],
+        c = this.shape[1],
+        i, j;
+
+    var data = new this.type(c * r);
+    for (i = 0; i < r; i++)
+      for (j = 0; j < c; j++)
+        data[j * r + i] = this.data[i * c + j];
+    this.data = data;
+    this.shape = [c, r];
+
+    return this;
   };
 
   /**
@@ -679,7 +719,6 @@
    * Solves AX = B using LU factorization, where A is the current matrix and
    * B is a Vector/Matrix containing the right hand side(s) of the equation.
    * @param {Matrix/Vector} rhs, right hand side(s) to solve for
-   * @param {Int32Array} array of pivoted row indices
    * @returns {Matrix} a new matrix containing the solutions of the system
    **/
   Matrix.prototype.solve = function (rhs) {
@@ -688,6 +727,28 @@
         ipiv = plu[1];
 
     return lu.lusolve(new Matrix(rhs), ipiv);
+  };
+
+  /**
+   * Solve A * X = B
+   * A - square matrix, B - this matrix/vector, X - solution with same size as B
+   * @param {Matrix} a
+   * @returns {Matrix} solution, this
+   */
+  Matrix.prototype.solvedSquare = function (a) {
+    var r1 = a.shape[0],
+        c1 = a.shape[1];
+    var r2 = this.shape[0],
+        c2 = this.shape[1];
+    if (c1 !== r2)
+      throw new Error('shapes are not aligned');
+    if (r1 != c1)
+      throw new Error('input matrix should be square');
+    var plu = Matrix.plu(a),
+        lu = plu[0],
+        ipiv = plu[1];
+    lu.lusolve(this, ipiv);
+    return this;
   };
 
   /**

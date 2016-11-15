@@ -191,6 +191,17 @@
   };
 
   /**
+   * Fills vector with 0
+   */
+  Vector.prototype.zeros = function() {
+    var length = this.length,
+        data = this.data,
+        k;
+    for (k = 0; k < length; k++)
+      data[k] = +0.0;
+  };
+
+  /**
    * Static method. Creates a vector containing ones (`1`) of `count` size, takes
    * an optional `type` argument which should be an instance of `TypedArray`.
    * @param {Number} count
@@ -211,6 +222,17 @@
       data[i] = 1;
 
     return new Vector(data);
+  };
+
+  /**
+   * Fills vector with 1
+   */
+  Vector.prototype.ones = function() {
+    var length = this.length,
+        data = this.data,
+        k;
+    for (k = 0; k < length; k++)
+      data[k] = +1.0;
   };
 
   /**
@@ -290,12 +312,30 @@
   };
 
   /**
+   * Static method. Creates a vector of `count` elements containing random
+   * values according to a normal (Gaussian) distribution, takes an optional `type`
+   * argument which should be an instance of `TypedArray`.
+   * @param {Number} count
+   * @param {Number} deviation (default 1)
+   * @param {Number} mean (default 0)
+   * @param {TypedArray} type
+   * @returns {Vector} a new vector of the specified size and `type`
+   **/
+  Vector.randomNormal = function (count, deviation, mean, type) {
+    type = type || Vector.defaultType;
+    var data = new type(count);
+    var v = new Vector(data);
+    v.randomNormal(deviation, mean);
+    return v;
+  };
+
+  /**
    * Fills vector with random values according to a normal (Gaussian) distribution
    * https://en.wikipedia.org/wiki/Normal_distribution
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
    **/
-  Vector.prototype.randomNormal = function (count, deviation, mean, type) {
+  Vector.prototype.randomNormal = function (deviation, mean) {
     this._randomNormal1(deviation, mean);
     //this._randomNormal2(deviation, mean);
   };
@@ -306,11 +346,11 @@
     deviation = deviation || 1.0;
     mean = mean || 0.0;
     var data = this.data,
-      dataOffset = this.dataOffset;
+      length = this.length;
     var u1, u2, 
       a, b0, b1, z0, z1;
 
-    for (var x = 0 ; x < count ; x++) {
+    for (var x = 0 ; x < length ; x++) {
       do {
         u1 = Math.random();
       } while ( u1 <= Number.EPSILON );
@@ -320,10 +360,10 @@
       b1 = Math.sin( 2.0 * Math.PI * u2 );
       z0 = (a * b0) * deviation + mean;
       z1 = (a * b1) * deviation + mean;
-      data[dataOffset + x] = z0;
+      data[x] = z0;
       x++;
-      if (x < count)
-        data[dataOffset + x] = z1;
+      if (x < length)
+        data[x] = z1;
     }
   };
 
@@ -333,11 +373,11 @@
     deviation = deviation || 1.0;
     mean = mean || 0.0;
     var data = this.data,
-      dataOffset = this.dataOffset;
+      length = this.length;
     var u, v, s, 
       mul, spare, z0, z1;
 
-    for (var x = 0 ; x < count ; x++) {
+    for (var x = 0 ; x < length ; x++) {
       do {
         u = Math.random() * 2 - 1;
         v = Math.random() * 2 - 1;
@@ -347,10 +387,10 @@
       spare = v * mul;
       z0 = mean + deviation * u * mul;
       z1 = mean + deviation * spare;
-      data[dataOffset + x] = z0;
+      data[x] = z0;
       x++;
-      if (x < count)
-        data[dataOffset + x] = z1;
+      if (x < length)
+        data[x] = z1;
     }
   };
 
@@ -632,6 +672,25 @@
       return [];
 
     return Array.prototype.slice.call(this.data);
+  };
+
+  /**
+   * Solve A * X = B
+   * A - square matrix, B - this vector, X - solution with same size as B
+   * @param {Matrix} a
+   * @returns {Vector} solution, this
+   */
+  Vector.prototype.solvedSquare = function (a) {
+    var r = a.shape[0],
+        c = a.shape[1];
+    var l = this.length;
+    if (c !== l)
+      throw new Error('shapes are not aligned');
+    if (r != c)
+      throw new Error('input matrix should be square');
+    var r = a.solve(this);
+    this.data = r.data;
+    return this;
   };
 
   module.exports = Vector;

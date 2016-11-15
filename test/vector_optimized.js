@@ -3,7 +3,8 @@
 
   var vectorious = require('../vectorious'),
       assert = require('assert'),
-      Vector = vectorious.Vector;
+      Vector = vectorious.Vector,
+      Matrix = vectorious.Matrix;
 
   describe('Vector (optimized)', function() {
     describe('Vector.add(a, b)', function() {
@@ -135,6 +136,20 @@
           assert.equal(3, a.max());
           assert.equal(3, b.max());
           assert.equal(5, c.max());
+        });
+      });
+
+      describe('.solvedSquare()', function() {
+        it('should work as expected', function() {
+          // 2*2 x 2*1 = 2*1
+          var a = new Matrix([[1, 2], [3, 4]]);
+          var x = new Vector([5, 6]);
+          var b = new Vector([17, 39]);
+          b.solvedSquare(a);
+          for (var i = 0 ; i < b.data.length ; i++) {
+            b.data[i] = b.data[i].toFixed(2);
+          }
+          assert.deepEqual(b, x);
         });
       });
     });
