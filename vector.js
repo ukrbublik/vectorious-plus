@@ -10,15 +10,19 @@
     this.length = 0;
 
     if (data instanceof Vector) {
+      //copy
       this.combine(data);
     } else if (data && data.shape) {
+      //convert from Matrix
       this.data = new data.type(data.data);
       this.length = data.shape[0] * data.shape[1];
       this.type = data.type;
     } else if (data instanceof Array) {
+      //convert to typed array
       this.data = new this.type(data);
       this.length = data.length;
     } else if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
+      //assign
       return Vector.fromTypedArray(data, options && options.length ? options.length : data.length);
     }
   }

@@ -3,7 +3,6 @@
 
   var Benchmark = require('benchmark'),
       Vector = require('../vectorious').Vector,
-      nblas = require('nblas'),
       suite = new Benchmark.Suite();
 
   var N = 1024,

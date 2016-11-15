@@ -12,14 +12,18 @@
     this.shape = [];
 
     if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
+      //assign
       return Matrix.fromTypedArray(data, options.shape);
     } else if (data instanceof Array) {
+      //convert to typed array
       return Matrix.fromArray(data);
     } else if (data instanceof Vector) {
+      //copy
       this.shape = options && options.shape ? options.shape : [data.length, 1];
       this.data = new data.type(data.data);
       this.type = data.type;
     } else if (data instanceof Matrix) {
+      //copy
       this.shape = [data.shape[0], data.shape[1]];
       this.data = new data.type(data.data);
       this.type = data.type;

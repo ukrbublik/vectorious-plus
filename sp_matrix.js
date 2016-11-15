@@ -4,7 +4,7 @@
   var Vector = require('./vector'),
       Matrix = require('./matrix');
   try {
-    var nblas = require('../nblas-plus'); //todo
+    var nblas = require('nblas-plus');
   } catch (error) {
     return;
   }
@@ -13,7 +13,7 @@
    * @method constructor
    * @desc Creates a `SpMatrix` from the supplied arguments.
    **/
-  function SpMatrix (options) {
+  function SpMatrix () {
     this.type = Matrix.defaultType;
     this.shape = [];
     this.handle = 0;
@@ -36,7 +36,7 @@
     this.shape = options.shape;
     if (options.type)
       this.type = options.type;
-    this.handle = nblas.uscr_begin(this.type == Float64Array, shape[0], shape[1]);
+    this.handle = nblas.uscr_begin(this.type == Float64Array, options.shape[0], options.shape[1]);
   };
 
   /**
@@ -50,12 +50,53 @@
    * 
    **/
   SpMatrix.prototype.addEntries = function (vals, indx, jndx) {
+    if (vals instanceof Array)
+      vals = new this.type(vals);
+    if (indx instanceof Array)
+      indx = new Int32Array(indx);
+    if (jndx instanceof Array)
+      jndx = new Int32Array(jndx);
+
     var nz = vals.length;
-    if (!(vals.length == indx.length == jndx.length))
+    if (!(vals.length == indx.length && indx.length == jndx.length))
       throw new Error("Sizes of input arrays diesn't match");
     if (!(vals instanceof this.type))
       throw new Error("Incorrect type of vals array, should match one specified at construction");
     nblas.uscr_insert_entries(this.handle, nz, vals, indx, jndx);
+  };
+
+  /**
+   * 
+   **/
+  SpMatrix.prototype.addCol = function (j, vals, indx) {
+    if (vals instanceof Array)
+      vals = new this.type(vals);
+    if (indx instanceof Array)
+      indx = new Int32Array(indx);
+
+    var nz = vals.length;
+    if (!(vals.length == indx.length))
+      throw new Error("Sizes of input arrays diesn't match");
+    if (!(vals instanceof this.type))
+      throw new Error("Incorrect type of vals array, should match one specified at construction");
+    nblas.uscr_insert_col(this.handle, j, nz, vals, indx);
+  };
+
+  /**
+   * 
+   **/
+  SpMatrix.prototype.addRow = function (i, vals, jndx) {
+    if (vals instanceof Array)
+      vals = new this.type(vals);
+    if (jndx instanceof Array)
+      jndx = new Int32Array(jndx);
+
+    var nz = vals.length;
+    if (!(vals.length == jndx.length))
+      throw new Error("Sizes of input arrays diesn't match");
+    if (!(vals instanceof this.type))
+      throw new Error("Incorrect type of vals array, should match one specified at construction");
+    nblas.uscr_insert_row(this.handle, i, nz, vals, jndx);
   };
 
   /**
@@ -122,13 +163,13 @@
   SpMatrix.prototype.multiplyVector = function (vector, res) {
     var r = this.shape[0],   // rows in this matrix
         c = this.shape[1],   // columns in this matrix
-        l = matrix.length;   // length of vector
+        l = vector.length;   // length of vector
     if (c !== l)
       throw new Error('sizes are not aligned');
 
     if (res === undefined)
-      res = Vector.fromTypedArray(new this.type(l), l);
-    nblas.usmv(this.handle, matrix.data, res.data);
+      res = Vector.fromTypedArray(new this.type(r), r);
+    nblas.usmv(this.handle, vector.data, res.data);
 
     return res;
   };

@@ -5,7 +5,10 @@
       Matrix = require('./matrix');
   try {
     var nblas = require('nblas-plus');
+    var SpVector = require('./sp_vector'),
+        SpMatrix = require('./sp_matrix');
   } catch (error) {
+    console.warn("nblas not included!");
     module.exports.Vector = Vector;
     module.exports.Matrix = Matrix;
     return;
@@ -77,6 +80,7 @@
     return res;
   };
 
+  // LAPACK optimizations
   Vector.prototype.solvedSquare = Matrix.prototype.solvedSquare = function (a) {
     var r1 = a.shape[0],
         c1 = a.shape[1];
@@ -90,6 +94,7 @@
     return this;
   }
 
+  // Other optimizations
   /*
   Matrix.prototype.transpose = function () {
     var r = this.shape[0],
@@ -110,5 +115,7 @@
 
   module.exports.Vector = Vector;
   module.exports.Matrix = Matrix;
+  module.exports.SpVector = SpVector;
+  module.exports.SpMatrix = SpMatrix;
   module.exports.BLAS = nblas;
 }());
