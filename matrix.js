@@ -303,6 +303,49 @@
   };
 
   /**
+   * Static method. Creates an `i x j` diagonal matrix with diagonal values `val`.
+   * Takes an optional `type` argument which should be an instance of `TypedArray`.
+   * @param {Number} i
+   * @param {Number} j
+   * @param {Number} val, non-0 diagonal values
+   * @param {TypedArray} type
+   * @returns {Matrix} a matrix of the specified dimensions and `type`
+   **/
+  Matrix.diagonal = function (i, j, val, type) {
+    if (i <= 0 || j <= 0)
+      throw new Error('invalid size');
+    if (val === undefined)
+      val = 1.;
+
+    type = type || Matrix.defaultType;
+
+    var data = new type(i * j),
+        i, j,
+        size = i * j;
+    for (i = 0; i < r; i++)
+      for (j = 0; j < c; j++)
+        data[i * c + j] = i == j ? val : +0.0;
+
+    return Matrix.fromTypedArray(data, [i, j]);
+  };
+
+  /**
+   * Fills matrix with `val` by diagonal, other with 0 (diagonal matrix)
+   */
+  Matrix.prototype.diagonal = function(val) {
+    if (val === undefined)
+      val = 1.;
+    var r = this.shape[0],
+        c = this.shape[1],
+        data = this.data,
+        i, j,
+        size = r * c;
+    for (i = 0; i < r; i++)
+      for (j = 0; j < c; j++)
+        data[i * c + j] = i == j ? val : +0.0;
+  };
+
+  /**
    * Static method. Creates an `i x j` matrix containing random values
    * according to a normal distribution, takes an optional `type` argument
    * which should be an instance of `TypedArray`.

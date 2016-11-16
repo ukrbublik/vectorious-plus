@@ -9,6 +9,14 @@
     return;
   }
 
+  var nodeCleanup = require('node-cleanup');
+  nodeCleanup(function() {
+    SpMatrix.handles.forEach(function(h, i) {
+      nblas.usds(h);
+    });
+    SpMatrix.handles = [];
+  });
+
   /**
    * @method constructor
    * @desc Creates a `SpMatrix` from the supplied arguments.
@@ -19,6 +27,12 @@
     this.handle = 0;
     this.nz = 0;
   }
+
+  /** 
+   * Holds all active handles
+   * Should be released on process exit
+   */
+  SpMatrix.handles = [];
 
   /**
    * Default type for data
@@ -37,6 +51,7 @@
     if (options.type)
       this.type = options.type;
     this.handle = nblas.uscr_begin(this.type == Float64Array, options.shape[0], options.shape[1]);
+    SpMatrix.handles.push(this.handle);
   };
 
   /**
@@ -179,6 +194,11 @@
    **/
   SpMatrix.prototype.destroy = function () {
     nblas.usds(this.handle);
+    
+    var ind = SpMatrix.handles.indexOf(this.handle);
+    if (ind != -1)
+      SpMatrix.handles.splice(ind, 1);
+
     this.handle = 0;
     this.nz = 0;
     this.shape = [];
