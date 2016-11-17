@@ -13,9 +13,13 @@
    * @method constructor
    * @desc Creates a `SpVector` from the supplied arguments.
    **/
-  function SpVector (length, data, indx) {
+  function SpVector (data, indx, options) {
     this.type = SpVector.defaultType;
-    this.length = length ? length : 0;
+    if (options && options.type)
+      this.type = options.type;
+    this.length = 0;
+    if (options && options.length > 0)
+      this.length = options.length;
     this.data = null; //Float64Array or Float32Array
     this.indx = null; //Int32Array
 
@@ -38,6 +42,9 @@
       else
         this.indx = indx;
       this.type = data.constructor;
+    } else if(!data && !indx && this.length > 0) {
+      //create empty
+      this.data = new this.type(this.length);
     }
   }
 
@@ -52,6 +59,8 @@
    * @returns {Number} the dot product of the two vectors
    **/
   SpVector.prototype.dot = function (vector) {
+    if (vector.type != this.type)
+      throw new Error('types are different');
     var res = nblas.usdot(this.data, this.indx, vector.data);
     return res;
   };
@@ -62,6 +71,8 @@
    * @returns {Vector} updated dense vector
    **/
   SpVector.prototype.add = function (vector) {
+    if (vector.type != this.type)
+      throw new Error('types are different');
     nblas.usaxpy(this.data, this.indx, vector.data, +1);
     return vector;
   };
@@ -72,6 +83,8 @@
    * @returns {Vector} updated dense vector
    **/
   SpVector.prototype.subtract = function (vector) {
+    if (vector.type != this.type)
+      throw new Error('types are different');
     nblas.usaxpy(this.data, this.indx, vector.data, -1);
     return vector;
   };

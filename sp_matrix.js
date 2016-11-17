@@ -22,7 +22,7 @@
    * @desc Creates a `SpMatrix` from the supplied arguments.
    **/
   function SpMatrix () {
-    this.type = Matrix.defaultType;
+    this.type = SpMatrix.defaultType;
     this.shape = [];
     this.handle = 0;
     this.nz = 0;
@@ -151,6 +151,8 @@
    *  containing the matrix product of `a` and `b`
    **/
   SpMatrix.prototype.multiplyMatrix = function (matrix, res) {
+    if (matrix.type != this.type)
+      throw new Error('types are different');
     var r1 = this.shape[0],   // rows in this matrix
         c1 = this.shape[1],   // columns in this matrix
         r2 = matrix.shape[0], // rows in multiplicand
@@ -176,6 +178,8 @@
    *  containing the matrix product of `a` and `b`
    **/
   SpMatrix.prototype.multiplyVector = function (vector, res) {
+    if (vector.type != this.type)
+      throw new Error('types are different');
     var r = this.shape[0],   // rows in this matrix
         c = this.shape[1],   // columns in this matrix
         l = vector.length;   // length of vector

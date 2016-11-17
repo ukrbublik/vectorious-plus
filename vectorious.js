@@ -17,6 +17,8 @@
   // BLAS optimizations
   Vector.prototype.add =
   Matrix.prototype.add = function (data) {
+    if (data.type != this.type)
+      throw new Error('types are different');
     var l1 = this instanceof Vector ? this.length : this.shape[0] * this.shape[1],
         l2 = data instanceof Vector ? data.length : data.shape[0] * data.shape[1];
     if (l1 !== l2)
@@ -30,6 +32,8 @@
 
   Vector.prototype.subtract =
   Matrix.prototype.subtract = function (data) {
+    if (data.type != this.type)
+      throw new Error('types are different');
     var l1 = this instanceof Vector ? this.length : this.shape[0] * this.shape[1],
         l2 = data instanceof Vector ? data.length : data.shape[0] * data.shape[1];
     if (l1 !== l2)
@@ -48,6 +52,8 @@
   };
 
   Vector.prototype.dot = function (vector) {
+    if (vector.type != this.type)
+      throw new Error('types are different');
     if (this.length !== vector.length)
       throw new Error('sizes do not match!');
 
@@ -62,10 +68,12 @@
   };
 
   Vector.prototype.max = function() {
-    return this.data[nblas.idamax(this.length, this.data, 1)];
+    return this.data[nblas.iamax(this.data)];
   };
 
   Matrix.prototype.multiply = function(matrix, res) {
+    if (matrix.type != this.type)
+      throw new Error('types are different');
     var r1 = this.shape[0],
         c1 = this.shape[1],
         r2 = matrix.shape[0],
@@ -82,6 +90,8 @@
 
   // LAPACK optimizations
   Vector.prototype.solvedSquare = Matrix.prototype.solvedSquare = function (a) {
+    if (a.type != this.type)
+      throw new Error('types are different');
     var r1 = a.shape[0],
         c1 = a.shape[1];
     var r2 = this instanceof Vector ? this.length : this.shape[0],

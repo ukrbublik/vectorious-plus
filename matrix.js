@@ -9,6 +9,8 @@
    **/
   function Matrix (data, options) {
     this.type = Matrix.defaultType;
+    if (options && options.type)
+      this.type = options.type;
     this.shape = [];
 
     if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
@@ -16,7 +18,7 @@
       return Matrix.fromTypedArray(data, options.shape);
     } else if (data instanceof Array) {
       //convert to typed array
-      return Matrix.fromArray(data);
+      return Matrix.fromArray(data, this.type);
     } else if (data instanceof Vector) {
       //copy
       this.shape = options && options.shape ? options.shape : [data.length, 1];
@@ -27,6 +29,10 @@
       this.shape = [data.shape[0], data.shape[1]];
       this.data = new data.type(data.data);
       this.type = data.type;
+    } else if(!data && options && options.shape) {
+      //create empty
+      this.shape = options.shape;
+      this.data = new this.type(options.shape[0] * options.shape[1]);
     }
   }
 
@@ -53,10 +59,11 @@
   /**
    *
    **/
-  Matrix.fromArray = function (array) {
+  Matrix.fromArray = function (array, type) {
+    type = type || Matrix.defaultType;
     var r = array.length, // number of rows
         c = array[0].length,  // number of columns
-        data = new Matrix.defaultType(r * c);
+        data = new type(r * c);
 
     var i, j;
     for (i = 0; i < r; ++i)
@@ -200,7 +207,7 @@
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
   Matrix.zeros = function (i, j, type) {
-    if (i <= 0 || j <= 0)
+    if (!(i > 0 && j > 0))
       throw new Error('invalid size');
 
     type = type || Matrix.defaultType;
@@ -225,6 +232,7 @@
         size = r * c;
     for (k = 0; k < size; k++)
       data[k] = +0.0;
+    return this;
   };
 
   /**
@@ -236,7 +244,7 @@
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
   Matrix.ones = function (i, j, type) {
-    if (i <= 0 || j <= 0)
+    if (!(i > 0 && j > 0))
       throw new Error('invalid size');
 
     type = type || Matrix.defaultType;
@@ -261,31 +269,34 @@
         size = r * c;
     for (k = 0; k < size; k++)
       data[k] = +1.0;
+    return this;
   };
 
   /**
    * Static method. Creates an `i x j` identity matrix, takes an
    * optional `type` argument which should be an instance of `TypedArray`.
    * Alias for identity()
-   * @param {Number} i
-   * @param {Number} j
+   * @param {Number} r
+   * @param {Number} c
    * @param {TypedArray} type
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
-  Matrix.eye = function (i, j, type) {
-    if (i <= 0 || j <= 0)
+  Matrix.eye = function (r, c, type) {
+    if (c === undefined)
+      c = r;
+    if (!(r > 0 && c > 0))
       throw new Error('invalid size');
 
     type = type || Matrix.defaultType;
 
-    var data = new type(i * j),
+    var data = new type(r * c),
         i, j,
-        size = i * j;
+        size = r * c;
     for (i = 0; i < r; i++)
       for (j = 0; j < c; j++)
         data[i * c + j] = i == j ? +1.0 : +0.0;
 
-    return Matrix.fromTypedArray(data, [i, j]);
+    return Matrix.fromTypedArray(data, [r, c]);
   };
 
   /**
@@ -300,33 +311,36 @@
     for (i = 0; i < r; i++)
       for (j = 0; j < c; j++)
         data[i * c + j] = i == j ? +1.0 : +0.0;
+    return this;
   };
 
   /**
    * Static method. Creates an `i x j` diagonal matrix with diagonal values `val`.
    * Takes an optional `type` argument which should be an instance of `TypedArray`.
-   * @param {Number} i
-   * @param {Number} j
+   * @param {Number} r
+   * @param {Number} c
    * @param {Number} val, non-0 diagonal values
    * @param {TypedArray} type
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
-  Matrix.diagonal = function (i, j, val, type) {
-    if (i <= 0 || j <= 0)
+  Matrix.diagonal = function (r, c, val, type) {
+    if (c === undefined)
+      c = r;
+    if (!(r > 0 && c > 0))
       throw new Error('invalid size');
     if (val === undefined)
       val = 1.;
 
     type = type || Matrix.defaultType;
 
-    var data = new type(i * j),
+    var data = new type(r * c),
         i, j,
-        size = i * j;
+        size = r * c;
     for (i = 0; i < r; i++)
       for (j = 0; j < c; j++)
         data[i * c + j] = i == j ? val : +0.0;
 
-    return Matrix.fromTypedArray(data, [i, j]);
+    return Matrix.fromTypedArray(data, [r, c]);
   };
 
   /**
@@ -343,6 +357,7 @@
     for (i = 0; i < r; i++)
       for (j = 0; j < c; j++)
         data[i * c + j] = i == j ? val : +0.0;
+    return this;
   };
 
   /**
@@ -398,6 +413,7 @@
   Matrix.prototype.randomNormal = function(deviation, mean) {
     this._randomNormal1(deviation, mean);
     //this._randomNormal2(deviation, mean);
+    return this;
   }
 
   //Uses Box–Muller method

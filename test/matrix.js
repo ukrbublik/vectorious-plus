@@ -87,6 +87,37 @@
       });
     });
 
+    describe('Matrix.eye()', function() {
+      it('should check input params as expected', function() {
+        assert.throws(Matrix.eye.bind(new Matrix()), Error);
+        assert.throws(Matrix.eye.bind(new Matrix(), 0), Error);
+        assert.throws(Matrix.eye.bind(new Matrix(), 0, 1), Error);
+        assert.throws(Matrix.eye.bind(new Matrix(), 1, 0), Error);
+        assert.deepEqual(Matrix.eye(3), Matrix.eye(3, 3));
+      });
+
+      it('should work as expected', function() {
+        assert.deepEqual(new Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]]), Matrix.eye(3));
+        assert.deepEqual(new Matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]]), Matrix.eye(3, 4));
+      });
+    });
+
+    describe('Matrix.diagonal()', function() {
+      it('should check input params as expected', function() {
+        assert.throws(Matrix.diagonal.bind(new Matrix()), Error);
+        assert.throws(Matrix.diagonal.bind(new Matrix(), 0), Error);
+        assert.throws(Matrix.diagonal.bind(new Matrix(), 0, 1), Error);
+        assert.throws(Matrix.diagonal.bind(new Matrix(), 1, 0), Error);
+        assert.deepEqual(Matrix.diagonal(3), Matrix.diagonal(3, 3));
+        assert.deepEqual(Matrix.diagonal(3, 3), Matrix.diagonal(3, 3, 1.));
+      });
+
+      it('should work as expected', function() {
+        assert.deepEqual(new Matrix([[2.5, 0, 0], [0, 2.5, 0], [0, 0, 2.5]]), Matrix.diagonal(3, 3, 2.5));
+        assert.deepEqual(new Matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]]), Matrix.diagonal(3, 4));
+      });
+    });
+
     describe('Matrix.magic()', function() {
       it('should throw error if invalid size', function() {
         assert.throws(Matrix.magic.bind(new Matrix(), -1), Error);
@@ -100,6 +131,7 @@
 
     describe('Matrix.zeros()', function() {
       it('should throw error if invalid size', function() {
+        assert.throws(Matrix.zeros.bind(new Matrix()), Error);
         assert.throws(Matrix.zeros.bind(new Matrix(), 0, 0), Error);
         assert.throws(Matrix.zeros.bind(new Matrix(), -1, 1), Error);
         assert.throws(Matrix.zeros.bind(new Matrix(), 1, -1), Error);
@@ -114,6 +146,7 @@
 
     describe('Matrix.ones()', function() {
       it('should throw error if invalid size', function() {
+        assert.throws(Matrix.ones.bind(new Matrix()), Error);
         assert.throws(Matrix.ones.bind(new Matrix(), 0, 0), Error);
         assert.throws(Matrix.ones.bind(new Matrix(), -1, 1), Error);
         assert.throws(Matrix.ones.bind(new Matrix(), 1, -1), Error);
@@ -158,6 +191,41 @@
           var c = new Matrix([[-4, -4], [-4, -4]]);
 
           assert.deepEqual(c, a.subtract(b));
+        });
+      });
+
+      describe('.zeros()', function() {
+        it('should work as expected', function() {
+          var a = new Matrix(null, {shape: [3, 3]});
+          var ans = new Matrix([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
+          assert.deepEqual(ans, a.zeros());
+        });
+      });
+
+      describe('.ones()', function() {
+        it('should work as expected', function() {
+          var a = new Matrix(null, {shape: [3, 3]});
+          var ans = new Matrix([[1, 1, 1], [1, 1, 1], [1, 1, 1]]);
+          assert.deepEqual(ans, a.ones());
+        });
+      });
+
+      describe('.eye()', function() {
+        it('should work as expected', function() {
+          var a = new Matrix(null, {shape: [3, 3]});
+          var ans = new Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+          assert.deepEqual(ans, a.eye());
+        });
+      });
+
+      describe('.diagonal()', function() {
+        it('should work as expected', function() {
+          var a = new Matrix(null, {shape: [3, 3]});
+          var ans = new Matrix([[2.5, 0, 0], [0, 2.5, 0], [0, 0, 2.5]]);
+          assert.deepEqual(ans, a.diagonal(2.5));
+
+          var ans = new Matrix([[1., 0, 0], [0, 1., 0], [0, 0, 1.]]);
+          assert.deepEqual(ans, a.diagonal());
         });
       });
 
@@ -422,9 +490,8 @@
         it('should work as expected', function() {
           var a = new Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
           var b = new Matrix([[1, 2, 3, 4], [5, 6, 7, 8]]);
-
-          assert.deepEqual(new Vector([1, 5, 9]), a.diag());
-          assert.deepEqual(new Vector([1, 6]), b.diag());
+          assert.deepEqual(new Vector([1, 5, 9], {type: a.type}), a.diag());
+          assert.deepEqual(new Vector([1, 6], {type: b.type}), b.diag());
         });
       });
 

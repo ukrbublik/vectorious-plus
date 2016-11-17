@@ -6,6 +6,31 @@
       Matrix = require('../matrix');
 
   describe('Vector', function() {
+    describe('Vector.randomNormal()', function() {
+      it('should generate true normal distribution', function() {
+        //https://docs.scipy.org/doc/numpy/reference/generated/numpy.random.normal.html
+        var sigma = 0.1, mu = 0;
+        var a = Vector.randomNormal(1000, sigma, mu);
+        var sum = a.reduce(function (sum, value) {
+          return sum + value;
+        });
+        var mean = sum / a.length;
+        var squareDiffs = a.map(function(value){
+          var diff = value - mean;
+          var sqrDiff = diff * diff;
+          return sqrDiff;
+        });
+        var avgSquareDiff = squareDiffs.reduce(function (sum, value) {
+          return sum + value;
+        }) / squareDiffs.length;
+        var stdDev = Math.sqrt(avgSquareDiff);
+        var d1 = Math.abs(mu - mean);
+        var d2 = Math.abs(sigma - stdDev);
+        assert(d1 < 0.01, d1 + " < 0.01");
+        assert(d2 < 0.01, d2 + " < 0.01");
+      });
+    });
+
     describe('Vector.add(a, b)', function() {
       it('should work as the static equivalent of a.add(b)', function() {
         var a = new Vector([1, 1, 1]);
@@ -370,8 +395,8 @@
         it('should work as expected', function() {
           // 2*2 x 2*1 = 2*1
           var a = new Matrix([[1, 2], [3, 4]]);
-          var x = new Vector([5, 6]);
-          var b = new Vector([17, 39]);
+          var x = new Vector([5, 6], {type: a.type});
+          var b = new Vector([17, 39], {type: a.type});
           b.solvedSquare(a);
           for (var i = 0 ; i < b.data.length ; i++) {
             b.data[i] = b.data[i].toFixed(2);

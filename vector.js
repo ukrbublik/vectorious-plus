@@ -7,6 +7,8 @@
    **/
   function Vector (data, options) {
     this.type = Vector.defaultType;
+    if (options && options.type)
+      this.type = options.type;
     this.length = 0;
 
     if (data instanceof Vector) {
@@ -24,6 +26,10 @@
     } else if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
       //assign
       return Vector.fromTypedArray(data, options && options.length ? options.length : data.length);
+    } else if(!data && options && options.length > 0) {
+      //create empty
+      this.length = options.length;
+      this.data = new this.type(options.length);
     }
   }
 
@@ -203,6 +209,7 @@
         k;
     for (k = 0; k < length; k++)
       data[k] = +0.0;
+    return this;
   };
 
   /**
@@ -237,6 +244,7 @@
         k;
     for (k = 0; k < length; k++)
       data[k] = +1.0;
+    return this;
   };
 
   /**
@@ -342,11 +350,12 @@
   Vector.prototype.randomNormal = function (deviation, mean) {
     this._randomNormal1(deviation, mean);
     //this._randomNormal2(deviation, mean);
+    return this;
   };
 
   //Uses Box–Muller method
   //https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-  Vector._randomNormal1 = function(deviation, mean) {
+  Vector.prototype._randomNormal1 = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
     var data = this.data,
@@ -373,7 +382,7 @@
 
   //Uses Marsaglia polar method
   //https://en.wikipedia.org/wiki/Marsaglia_polar_method
-  Vector._randomNormal2 = function(deviation, mean) {
+  Vector.prototype._randomNormal2 = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
     var data = this.data,
