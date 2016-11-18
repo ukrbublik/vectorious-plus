@@ -36,7 +36,7 @@
     "mocha": "^2.4.5"
   },
   "dependencies": {
-    "nblas-plus": "^1.2.7",
+    "nblas-plus": "^1.2.8",
     "node-cleanup": "^1.0.1"
   }
 }
