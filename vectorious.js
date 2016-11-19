@@ -105,15 +105,14 @@
   }
 
   // Other optimizations
-  /*
-  Matrix.prototype.transpose = function () {
+  Matrix.prototype.transpose = function (res) {
     var r = this.shape[0],
         c = this.shape[1];
-    var b = Matrix.fromTypedArray(new this.type(c * r), [c, r]);
-    nblas.TrTo(this.data, b.data, r, c);
-    return b;
+    if (res === undefined)
+      res = Matrix.fromTypedArray(new this.type(c * r), [c, r]);
+    nblas.TrTo(this.data, res.data, r, c);
+    return res;
   };
-  */
 
   Matrix.prototype.transposed = function () {
     var r = this.shape[0],
