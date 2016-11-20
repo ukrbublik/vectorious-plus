@@ -89,19 +89,57 @@
   };
 
   // LAPACK optimizations
-  Vector.prototype.solvedSquare = Matrix.prototype.solvedSquare = function (a) {
-    if (a.type != this.type)
+  Matrix.solveSquare = function (a, b, x, keepA) {
+    var isBVector = (b instanceof Vector);
+    if (keepA === undefined)
+      keepA = true;
+    if (a.type != b.type)
       throw new Error('types are different');
     var r1 = a.shape[0],
         c1 = a.shape[1];
-    var r2 = this instanceof Vector ? this.length : this.shape[0],
-        c2 = this instanceof Vector ? 1 : this.shape[1];
+    var r2 = isBVector ? b.length : b.shape[0],
+        c2 = isBVector ? 1 : b.shape[1];
     if (c1 !== r2)
       throw new Error('shapes are not aligned');
     if (r1 != c1)
       throw new Error('input matrix should be square');
-    nblas.gesv(a.data, this.data, r1, c2);
-    return this;
+    if (x === undefined)
+      x = isBVector ? new Vector(b) : new Matrix(b);
+    
+    var ipiv = new Int32Array(r1);
+    var af = keepA ? new Matrix(a) : a;
+    nblas.gesv(af.data, x.data, r1, c2, ipiv);
+    return x;
+  }
+
+  // luSquare() + luSolveSquare() is slower than solveSquare() by some reason.. (see benchmark)
+  Matrix.prototype.luSquare = function (af) {
+    var m = this.shape[0],
+        n = this.shape[1];
+    var ipiv = new Int32Array(Math.min(m, n));
+    if (af === undefined)
+      af = new Matrix(this);
+    nblas.getrf(af.data, ipiv, m, n);
+    return [af, ipiv];
+  }
+
+  Matrix.luSolveSquare = function (af, ipiv, a, b, x, r, c) {
+    var isBVector = (b instanceof Vector);
+    var r1 = a.shape[0],
+        c1 = a.shape[1];
+    var r2 = isBVector ? b.length : b.shape[0],
+        c2 = isBVector ? 1 : b.shape[1];
+    if (c1 !== r2)
+      throw new Error('shapes are not aligned');
+    if (r1 != c1)
+      throw new Error('input matrix should be square');
+    if (x === undefined)
+      x = isBVector ? new Vector(null, {type: b.type, length: b.length}) 
+        : new Matrix(null, {type: b.type, shape: b.shape});
+
+    nblas.gesvx(a.data, b.data, x.data, r1, c2, af.data, ipiv, 
+      nblas.Lapack.Fact.F, undefined, undefined, r, c);
+    return x;
   }
 
   // Other optimizations

@@ -687,25 +687,6 @@
     return Array.prototype.slice.call(this.data);
   };
 
-  /**
-   * Solve A * X = B
-   * A - square matrix, B - this vector, X - solution with same size as B
-   * @param {Matrix} a
-   * @returns {Vector} solution, this
-   */
-  Vector.prototype.solvedSquare = function (a) {
-    var r = a.shape[0],
-        c = a.shape[1];
-    var l = this.length;
-    if (c !== l)
-      throw new Error('shapes are not aligned');
-    if (r != c)
-      throw new Error('input matrix should be square');
-    var r = a.solve(this);
-    this.data = r.data;
-    return this;
-  };
-
   module.exports = Vector;
   try {
     window.Vector = Vector;

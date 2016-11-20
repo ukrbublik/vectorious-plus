@@ -795,23 +795,38 @@
   /**
    * Solve A * X = B
    * A - square matrix, B - this matrix/vector, X - solution with same size as B
-   * @param {Matrix} a
-   * @returns {Matrix} solution, this
+   * @param {Matrix} a, must be square and of full-rank
+   * @param {Matrix/Vector} b
+   * @param {Matrix/Vector} x solution; if passed, solution matrix/vector will be 
+   *  written to it, else will be created
+   * @param {bool} keepA if false, `a` will be LU-factorized, else `a` will be unmodified (requires more RAM)
+   * @returns {Matrix/Vector} solution
    */
-  Matrix.prototype.solvedSquare = function (a) {
+  Matrix.solveSquare = function (a, b, x, keepA) {
+    var isBVector = (b instanceof Vector);
+    if (keepA === undefined)
+      keepA = true;
     var r1 = a.shape[0],
         c1 = a.shape[1];
-    var r2 = this.shape[0],
-        c2 = this.shape[1];
+    var r2 = isBVector ? b.length : b.shape[0],
+        c2 = isBVector ? 1 : b.shape[1];
     if (c1 !== r2)
       throw new Error('shapes are not aligned');
     if (r1 != c1)
       throw new Error('input matrix should be square');
-    var plu = Matrix.plu(a),
+    if (x === undefined)
+      x = isBVector ? new Vector(b) : new Matrix(b);
+
+    var plu = keepA ? Matrix.plu(a) : a.plu(),
         lu = plu[0],
         ipiv = plu[1];
-    lu.lusolve(this, ipiv);
-    return this;
+    var rhs;
+    if (!isBVector)
+      rhs = x;
+    else
+      rhs = new Matrix(x.data, {shape: [r2, c2]});
+    lu.lusolve(rhs, ipiv);
+    return x;
   };
 
   /**

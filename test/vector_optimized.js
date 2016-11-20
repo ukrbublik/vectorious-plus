@@ -139,19 +139,6 @@
         });
       });
 
-      describe('.solvedSquare()', function() {
-        it('should work as expected', function() {
-          // 2*2 x 2*1 = 2*1
-          var a = new Matrix([[1, 2], [3, 4]]);
-          var x = new Vector([5, 6], {type: a.type});
-          var b = new Vector([17, 39], {type: a.type});
-          b.solvedSquare(a);
-          for (var i = 0 ; i < b.data.length ; i++) {
-            b.data[i] = b.data[i].toFixed(2);
-          }
-          assert.deepEqual(b, x);
-        });
-      });
     });
   });
 })();

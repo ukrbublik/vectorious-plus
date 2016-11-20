@@ -3,12 +3,18 @@
 
   var Benchmark = require('benchmark'),
       Matrix = require('../vectorious').Matrix,
+      Vector = require('../vectorious').Vector,
       suite = new Benchmark.Suite();
 
   var N = 128,
       a = Matrix.random(N, N),
       b = Matrix.random(N, N),
       rhs = Matrix.random(N, 1);
+
+  var tmp = a.luSquare();
+  var af = tmp[0],
+    ipiv = tmp[1];
+  var x = new Matrix(rhs);
 
   console.log('a, b = Matrix.random(' + N + ', ' + N + ')');
 
@@ -24,6 +30,11 @@
     .add('Matrix.add(a, b)', function () { Matrix.add(a, b); })
     .add('Matrix.subtract(a, b)', function () { Matrix.subtract(a, b); })
     .add('Matrix.scale(Math.random())', function () { Matrix.scale(a, Math.random()); })
+    .add('Matrix.luSolveSquare(af, ipiv, a, rhs)', function () {
+      Matrix.luSolveSquare(af, ipiv, a, rhs);
+    })
+    .add('Matrix.solveSquare(a, rhs)', function () { Matrix.solveSquare(a, rhs); })
+    .add('Matrix.solveSquare(a, rhs, x)', function () { Matrix.solveSquare(a, rhs, x); })
     .add('a.add(b)', function () { a.add(b); })
     .add('a.subtract(b)', function () { a.subtract(b); })
     .add('a.scale(Math.random())', function () { a.scale(Math.random()); })
@@ -33,8 +44,7 @@
     .add('a.gauss()', function () { a.gauss(); })
     .add('a.lu()', function () { a.lu(); })
     .add('a.plu()', function () { a.plu(); })
-    .add('a.solve()', function () { a.solve(rhs); })
-    .add('rhs.solvedSquare()', function () { rhs.solvedSquare(a); })
+    .add('a.solve(rhs)', function () { a.solve(rhs); })
     .add('a.trace()', function () { a.trace(); })
     .add('a.swap(i, j)', function () { a.swap(Math.floor(Math.random() * N), Math.floor(Math.random() * N)); })
     .on('cycle', function (event) { console.log(String(event.target)); })
