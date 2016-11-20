@@ -675,6 +675,23 @@
           assert.deepEqual([[1, 2], [3, 4], [5, 6]], new Matrix([[1, 2], [3, 4], [5, 6]]).toArray());
         });
       });
+
+      describe('.row()', function() {
+        it('should work as expected', function() {
+          var a = new Matrix([[1, 2, 1], [-2, -3, 1], [3, 5, 0]]);
+          var r1 = new Vector([-2, -3, 1]);
+          assert.deepEqual(a.row(1), r1);
+          assert.deepEqual(a.row(1, true), r1);
+        });
+      });
+
+      describe('.col()', function() {
+        it('should work as expected', function() {
+          var a = new Matrix([[1, 2, 1], [-2, -3, 1], [3, 5, 0]]);
+          var c1 = new Vector([2, -3, 5]);
+          assert.deepEqual(a.col(1), c1);
+        });
+      });
     });
   });
 })();

@@ -1043,6 +1043,45 @@
   };
 
   /**
+   * Get row of matrix
+   * @param {Number} r
+   * @param {Bool} copy
+   * @returns {Vector} row
+   **/
+  Matrix.prototype.row = function(r, copy) {
+    if (copy === undefined)
+      copy = true;
+    var rows = this.shape[0],
+        cols = this.shape[1];
+    if(!( r >= 0 && r < rows ))
+      throw new Error("Incorrect row");
+    var size1 = this.data.byteLength / this.data.length;
+    var data = new this.type(this.data.buffer, r * cols * size1, cols);
+    if (copy)
+      data = new this.type(data);
+    var v = new Vector(data, {length: cols});
+    return v;
+  }
+
+  /**
+   * Get col of matrix
+   * @param {Number} c
+   * @returns {Vector} col
+   **/
+  Matrix.prototype.col = function(c) {
+    var rows = this.shape[0],
+        cols = this.shape[1];
+    if(!( c >= 0 && c < cols ))
+      throw new Error("Incorrect col");
+    var size1 = this.data.byteLength / this.data.length;
+    var data = new this.type(rows);
+    for (var r = 0 ; r < rows ; r++)
+      data[r] = this.data[r * cols + c];
+    var v = new Vector(data, {length: rows});
+    return v;
+  }
+
+  /**
    * Swaps two rows `i` and `j` in a matrix
    * @param {Number} i
    * @param {Number} j
