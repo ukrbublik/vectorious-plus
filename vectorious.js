@@ -89,7 +89,7 @@
   };
 
   // LAPACK optimizations
-  Matrix.solveSquare = function (a, b, x, keepA) {
+  Matrix.solveSquare = function (a, b, x, keepA, ipiv) {
     var isBVector = (b instanceof Vector);
     if (keepA === undefined)
       keepA = true;
@@ -103,11 +103,15 @@
       throw new Error('shapes are not aligned');
     if (r1 != c1)
       throw new Error('input matrix should be square');
+
     if (x === undefined)
       x = isBVector ? new Vector(b) : new Matrix(b);
-    
-    var ipiv = new Int32Array(r1);
+    else if (b != x)
+      nblas.BufCopy(x.data, b.data, x.data.byteLength);
+    if (ipiv === undefined)
+      ipiv = new Int32Array(r1);
     var af = keepA ? new Matrix(a) : a;
+
     nblas.gesv(af.data, x.data, r1, c2, ipiv);
     return x;
   }

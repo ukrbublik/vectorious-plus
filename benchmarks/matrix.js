@@ -15,6 +15,8 @@
   var af = tmp[0],
     ipiv = tmp[1];
   var x = new Matrix(rhs);
+  var r = new Float64Array(N),
+    c = new Float64Array(N);
 
   console.log('a, b = Matrix.random(' + N + ', ' + N + ')');
 
@@ -30,9 +32,8 @@
     .add('Matrix.add(a, b)', function () { Matrix.add(a, b); })
     .add('Matrix.subtract(a, b)', function () { Matrix.subtract(a, b); })
     .add('Matrix.scale(Math.random())', function () { Matrix.scale(a, Math.random()); })
-    .add('Matrix.luSolveSquare(af, ipiv, a, rhs)', function () {
-      Matrix.luSolveSquare(af, ipiv, a, rhs);
-    })
+    .add('Matrix.luSolveSquare(af, ipiv, a, rhs)', function () { Matrix.luSolveSquare(af, ipiv, a, rhs); })
+    .add('Matrix.luSolveSquare(af, ipiv, a, rhs, x, r, c)', function () { Matrix.luSolveSquare(af, ipiv, a, rhs, x, r, c); })
     .add('Matrix.solveSquare(a, rhs)', function () { Matrix.solveSquare(a, rhs); })
     .add('Matrix.solveSquare(a, rhs, x)', function () { Matrix.solveSquare(a, rhs, x); })
     .add('a.add(b)', function () { a.add(b); })
