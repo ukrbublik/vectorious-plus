@@ -101,46 +101,48 @@
       });
     });
 
-    describe('Matrix.pluSquare() + Matrix.luSolveSquare()', function() {
-      it('should work same as solveSquare()', function() {
-        // 5*5 x 5*3 = 5*3
-        var a = new Float64Array([
-          6.80,   -6.05,  -0.45,   8.32,  -9.67, 
-          -2.11,  -3.30,   2.58,   2.71,  -5.14, 
-          5.66,    5.36,  -2.70,   4.35,  -7.26,
-          5.97,   -4.44,   0.27,  -7.17,   6.08,
-          8.23,    1.08,   9.04,   2.14,  -6.87
-        ]);
-        var b = new Float64Array([
-          4.02,   -1.56,   9.81,
-          6.19,    4.00,  -4.09,
-          -8.22,  -8.67,  -4.57,
-          -7.57,   1.75,  -8.61,
-          -3.03,   2.86,   8.99
-        ]);
-        var ans = new Float64Array([
-          -0.80,  -0.39,   0.96,
-          -0.70,  -0.55,   0.22,
-          0.59,    0.84,   1.90,
-          1.32,   -0.10,   5.36,
-          0.57,    0.11,   4.04
-        ]);
-        var A = new Matrix(a, {shape: [5, 5]});
-        var B = new Matrix(b, {shape: [5, 3]});
-        var ANS = new Matrix(ans, {shape: [5, 3]});
-        var A_copy = new Matrix(A);
-        var B_copy = new Matrix(B);
+    if (Matrix.prototype.luSquare !== undefined) {
+      describe('Matrix.pluSquare() + Matrix.luSolveSquare()', function() {
+        it('should work same as solveSquare()', function() {
+          // 5*5 x 5*3 = 5*3
+          var a = new Float64Array([
+            6.80,   -6.05,  -0.45,   8.32,  -9.67, 
+            -2.11,  -3.30,   2.58,   2.71,  -5.14, 
+            5.66,    5.36,  -2.70,   4.35,  -7.26,
+            5.97,   -4.44,   0.27,  -7.17,   6.08,
+            8.23,    1.08,   9.04,   2.14,  -6.87
+          ]);
+          var b = new Float64Array([
+            4.02,   -1.56,   9.81,
+            6.19,    4.00,  -4.09,
+            -8.22,  -8.67,  -4.57,
+            -7.57,   1.75,  -8.61,
+            -3.03,   2.86,   8.99
+          ]);
+          var ans = new Float64Array([
+            -0.80,  -0.39,   0.96,
+            -0.70,  -0.55,   0.22,
+            0.59,    0.84,   1.90,
+            1.32,   -0.10,   5.36,
+            0.57,    0.11,   4.04
+          ]);
+          var A = new Matrix(a, {shape: [5, 5]});
+          var B = new Matrix(b, {shape: [5, 3]});
+          var ANS = new Matrix(ans, {shape: [5, 3]});
+          var A_copy = new Matrix(A);
+          var B_copy = new Matrix(B);
 
-        var plu = A.luSquare();
-        var X = Matrix.luSolveSquare(plu[0], plu[1], A, B);
-        for (var i = 0 ; i < X.data.length ; i++) {
-          X.data[i] = X.data[i].toFixed(2);
-        }
-        assert.deepEqual(X, ANS);
-        assert.deepEqual(A, A_copy);
-        assert.deepEqual(B, B_copy);
+          var plu = A.luSquare();
+          var X = Matrix.luSolveSquare(plu[0], plu[1], A, B);
+          for (var i = 0 ; i < X.data.length ; i++) {
+            X.data[i] = X.data[i].toFixed(2);
+          }
+          assert.deepEqual(X, ANS);
+          assert.deepEqual(A, A_copy);
+          assert.deepEqual(B, B_copy);
+        });
       });
-    });
+    }
 
     describe('Matrix.prototype', function() {
       describe('.add()', function() {

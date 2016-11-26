@@ -168,8 +168,9 @@
 
   Vector.prototype.zeros =
   Matrix.prototype.zeros = function() {
-    var r = this.shape[0],
-        c = this.shape[1];
+    var isVector = (this instanceof Vector);
+    var r = isVector ? 1 : this.shape[0],
+        c = isVector ? this.length : this.shape[1];
     var size1 = this.data.byteLength / this.data.length;
     nblas.BufSet(this.data, 0, +0, size1 * r * c);
     return this;
@@ -184,6 +185,9 @@
 
   Vector.prototype.ones = 
   Matrix.prototype.ones = function() {
+    var isVector = (this instanceof Vector);
+    var r = isVector ? 1 : this.shape[0],
+        c = isVector ? this.length : this.shape[1];
     nblas.MatrixOnes(this.data, r, c, 1.);
     return this;
   };
