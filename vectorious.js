@@ -16,32 +16,32 @@
 
   // BLAS optimizations
   Vector.prototype.add =
-  Matrix.prototype.add = function (data) {
-    if (data.type != this.type)
+  Matrix.prototype.add = function (b) {
+    if (b.type != this.type)
       throw new Error('types are different');
     var l1 = this instanceof Vector ? this.length : this.shape[0] * this.shape[1],
-        l2 = data instanceof Vector ? data.length : data.shape[0] * data.shape[1];
+        l2 = b instanceof Vector ? b.length : b.shape[0] * b.shape[1];
     if (l1 !== l2)
       throw new Error('sizes do not match!');
     if (!l1 && !l2)
       return this;
 
-    nblas.axpy(data.data, this.data);
+    nblas.axpy(b.data, this.data);
     return this;
   };
 
   Vector.prototype.subtract =
-  Matrix.prototype.subtract = function (data) {
-    if (data.type != this.type)
+  Matrix.prototype.subtract = function (b) {
+    if (b.type != this.type)
       throw new Error('types are different');
     var l1 = this instanceof Vector ? this.length : this.shape[0] * this.shape[1],
-        l2 = data instanceof Vector ? data.length : data.shape[0] * data.shape[1];
+        l2 = b instanceof Vector ? b.length : b.shape[0] * b.shape[1];
     if (l1 !== l2)
       throw new Error('sizes do not match!');
     if (!l1 && !l2)
       return this;
 
-    nblas.axpy(data.data, this.data, -1);
+    nblas.axpy(b.data, this.data, -1);
     return this;
   };
 
@@ -106,8 +106,10 @@
 
     if (x === undefined)
       x = isBVector ? new Vector(b) : new Matrix(b);
-    else if (b != x)
-      nblas.BufCopy(x.data, b.data, x.data.byteLength);
+    else if (b != x) {
+      var xSize1 = x.data.byteLength / x.data.length;
+      nblas.BufCopy(x.data, 0, b.data, xSize1 * r2 * c2);
+    }
     if (ipiv === undefined)
       ipiv = new Int32Array(r1);
     var af = keepA ? new Matrix(a) : a;
@@ -161,6 +163,28 @@
         c = this.shape[1];
     nblas.TrIp(this.data, r, c);
     this.shape = [c, r];
+    return this;
+  };
+
+  Vector.prototype.zeros =
+  Matrix.prototype.zeros = function() {
+    var r = this.shape[0],
+        c = this.shape[1];
+    var size1 = this.data.byteLength / this.data.length;
+    nblas.BufSet(this.data, 0, +0, size1 * r * c);
+    return this;
+  };
+
+  Matrix.prototype.diagonal = function(val) {
+    var r = this.shape[0],
+        c = this.shape[1];
+    nblas.MatrixDiagonal(this.data, r, c, val);
+    return this;
+  };
+
+  Vector.prototype.ones = 
+  Matrix.prototype.ones = function() {
+    nblas.MatrixOnes(this.data, r, c, 1.);
     return this;
   };
 

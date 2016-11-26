@@ -45,8 +45,8 @@
    *
    **/
   Matrix.fromTypedArray = function (data, shape) {
-    if (shape[0] * shape[1] > data.length)
-      throw new Error("Matrix shape > array dimensions.");
+    if (shape[0] * shape[1] != data.length)
+      throw new Error("Matrix shape != array dimensions.");
 
     var self = Object.create(Matrix.prototype);
     self.shape = shape;
@@ -212,13 +212,10 @@
 
     type = type || Matrix.defaultType;
 
-    var data = new type(i * j),
-        k,
-        size = i * j;
-    for (k = 0; k < size; k++)
-      data[k] = +0.0;
-
-    return Matrix.fromTypedArray(data, [i, j]);
+    var data = new type(i * j);
+    var m = Matrix.fromTypedArray(data, [i, j]);
+    m.zeros();
+    return m;
   };
 
   /**
@@ -249,13 +246,10 @@
 
     type = type || Matrix.defaultType;
 
-    var data = new type(i * j),
-        k = 0,
-        size = i * j;
-    for (k = 0; k < size; k++)
-      data[k] = +1.0;
-
-    return Matrix.fromTypedArray(data, [i, j]);
+    var data = new type(i * j);
+    var m = Matrix.fromTypedArray(data, [i, j]);
+    m.ones();
+    return m;
   };
 
   /**
@@ -289,29 +283,17 @@
 
     type = type || Matrix.defaultType;
 
-    var data = new type(r * c),
-        i, j,
-        size = r * c;
-    for (i = 0; i < r; i++)
-      for (j = 0; j < c; j++)
-        data[i * c + j] = i == j ? +1.0 : +0.0;
-
-    return Matrix.fromTypedArray(data, [r, c]);
+    var data = new type(r * c);
+    var m = Matrix.fromTypedArray(data, [r, c]);
+    m.eye();
+    return m;
   };
 
   /**
    * Fills matrix with 1 by diagonal, other with 0 (identity matrix)
    */
   Matrix.prototype.eye = function() {
-    var r = this.shape[0],
-        c = this.shape[1],
-        data = this.data,
-        i, j,
-        size = r * c;
-    for (i = 0; i < r; i++)
-      for (j = 0; j < c; j++)
-        data[i * c + j] = i == j ? +1.0 : +0.0;
-    return this;
+    return this.diagonal(1.);
   };
 
   /**
@@ -333,14 +315,10 @@
 
     type = type || Matrix.defaultType;
 
-    var data = new type(r * c),
-        i, j,
-        size = r * c;
-    for (i = 0; i < r; i++)
-      for (j = 0; j < c; j++)
-        data[i * c + j] = i == j ? val : +0.0;
-
-    return Matrix.fromTypedArray(data, [r, c]);
+    var data = new type(r * c);
+    var m = Matrix.fromTypedArray(data, [r, c]);
+    m.diagonal(val);
+    return m;
   };
 
   /**

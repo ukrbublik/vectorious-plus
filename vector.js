@@ -44,8 +44,8 @@
   Vector.fromTypedArray = function (data, length) {
     if (length === undefined)
       length = data.length;
-    if (length > data.length)
-      throw new Error("Vector length > array length.");
+    if (length != data.length)
+      throw new Error("Vector length != array length.");
 
     var self = Object.create(Vector.prototype);
     self.data = data;
@@ -69,6 +69,18 @@
    * Adds `vector` to the current vector.
    * @param {Vector} vector
    * @returns {Vector} this
+  nblas.MatrixDiagonal = function(a, m, n, val) {
+    return typeCheck(a) ?
+      nblas.dMatrixDiagonal(m, n, a, val) :
+      nblas.sMatrixDiagonal(m, n, a, val);
+  };
+  nblas.MatrixOnes = function(a, val) {
+    if (val === undefined)
+      val = 1.;
+    return typeCheck(a) ?
+      nblas.dMatrixOnes(a, a.length, val) :
+      nblas.sMatrixOnes(a, a.length, val);
+  };
    **/
   Vector.prototype.add = function (vector) {
     var l1 = this.length,
@@ -191,13 +203,11 @@
       return new Vector();
 
     type = type || Vector.defaultType;
-    var data = new type(count),
-        i;
 
-    for (i = 0; i < count; i++)
-      data[i] = +0.0;
-
-    return new Vector(data);
+    var data = new type(count);
+    var v = new Vector(data);
+    v.zeros();
+    return v;
   };
 
   /**
@@ -226,13 +236,11 @@
       return new Vector();
 
     type = type || Vector.defaultType;
-    var data = new type(count),
-        i;
 
-    for (i = 0; i < count; i++)
-      data[i] = 1;
-
-    return new Vector(data);
+    var data = new type(count);
+    var v = new Vector(data);
+    v.ones();
+    return v;
   };
 
   /**
