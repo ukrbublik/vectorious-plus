@@ -12,9 +12,11 @@
 
 ##### In node.js
 
-First please read [**Preinstall section of nblas-plus**](https://github.com/ukrbublik/nblas-plus/blob/master/README.md#preinstall)
+First please read and apply [**Preinstall section of nblas-plus**](https://github.com/ukrbublik/nblas-plus/blob/master/README.md#preinstall)
 
 Windows is not tested.
+
+Then install:
 
 ```bash
 $ npm install vectorious-plus
