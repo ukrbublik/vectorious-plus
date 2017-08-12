@@ -12,6 +12,9 @@
 
 ##### In node.js
 
+First please read [**Preinstall section of nblas-plus**](https://github.com/ukrbublik/nblas-plus/blob/master/README.md#preinstall)
+Windows is not tested.
+
 ```bash
 $ npm install vectorious-plus
 ```
@@ -25,17 +28,6 @@ var v = require('vectorious'),
     BLAS = v.BLAS; // access BLAS routines (and also SPBLAS, LAPACK)
 ```
 
-Will use your local BLAS copy (if any). Some notes for different operating systems:
-
-* **OSX** - by default included in the Accelerate framework
-* **Windows** - https://icl.cs.utk.edu/lapack-for-windows/
-* **Debian/Ubuntu** - 
-```bash
-$ sudo apt-get install libblas-dev
-$ sudo apt-get install libgsl0-dev
-$ sudo apt-get install liblapacke-dev
-```
-Tested on Ubuntu.
 
 ##### In browser
 
