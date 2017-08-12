@@ -107,7 +107,7 @@
     if (x === undefined)
       x = isBVector ? new Vector(b) : new Matrix(b);
     else if (b != x) {
-      var xSize1 = x.data.byteLength / x.data.length;
+      var xSize1 = x.data.constructor.BYTES_PER_ELEMENT;
       nblas.BufCopy(x.data, 0, b.data, xSize1 * r2 * c2);
     }
     if (ipiv === undefined)
@@ -171,7 +171,7 @@
     var isVector = (this instanceof Vector);
     var r = isVector ? 1 : this.shape[0],
         c = isVector ? this.length : this.shape[1];
-    var size1 = this.data.byteLength / this.data.length;
+    var size1 = this.data.constructor.BYTES_PER_ELEMENT;
     nblas.BufSet(this.data, 0, +0, size1 * r * c);
     return this;
   };

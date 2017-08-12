@@ -1033,7 +1033,7 @@
         cols = this.shape[1];
     if(!( r >= 0 && r < rows ))
       throw new Error("Incorrect row");
-    var size1 = this.data.byteLength / this.data.length;
+    var size1 = this.data.constructor.BYTES_PER_ELEMENT;
     var data = new this.type(this.data.buffer, r * cols * size1, cols);
     if (copy)
       data = new this.type(data);
@@ -1051,7 +1051,7 @@
         cols = this.shape[1];
     if(!( c >= 0 && c < cols ))
       throw new Error("Incorrect col");
-    var size1 = this.data.byteLength / this.data.length;
+    var size1 = this.data.constructor.BYTES_PER_ELEMENT;
     var data = new this.type(rows);
     for (var r = 0 ; r < rows ; r++)
       data[r] = this.data[r * cols + c];
