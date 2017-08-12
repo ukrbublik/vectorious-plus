@@ -13,6 +13,7 @@
 ##### In node.js
 
 First please read [**Preinstall section of nblas-plus**](https://github.com/ukrbublik/nblas-plus/blob/master/README.md#preinstall)
+
 Windows is not tested.
 
 ```bash
