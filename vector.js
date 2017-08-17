@@ -190,6 +190,42 @@
   };
 
   /**
+   * Static method. Creates a vector containing optional 'value' (default 0) of `count` size, takes
+   * an optional `type` argument which should be an instance of `TypedArray`.
+   * @param {Number} count
+   * @param {Number} value
+   * @param {TypedArray} type
+   * @returns {Vector} a new vector of the specified size and `type`
+   **/
+  Vector.fill = function (count, value, type) {
+    if (count < 0)
+      throw new Error('invalid size');
+    else if (count === 0)
+      return new Vector();
+   
+    type = type || Vector.defaultType;
+
+    var data = new type(count);
+    var v = new Vector(data);
+    v.fill(value);
+    return v;
+  };
+  
+  /**
+   * Fills vector with value
+   * @param {Number} value
+   */
+  Vector.prototype.fill = function(value) {
+    value = value || +0.0;
+    var length = this.length,
+        data = this.data,
+        k;
+    for (k = 0; k < length; k++)
+      data[k] = value;
+    return this;
+  };
+
+  /**
    * Static method. Creates a vector containing zeros (`0`) of `count` size, takes
    * an optional `type` argument which should be an instance of `TypedArray`.
    * @param {Number} count
@@ -197,28 +233,14 @@
    * @returns {Vector} a new vector of the specified size and `type`
    **/
   Vector.zeros = function (count, type) {
-    if (count < 0)
-      throw new Error('invalid size');
-    else if (count === 0)
-      return new Vector();
-
-    type = type || Vector.defaultType;
-
-    var data = new type(count);
-    var v = new Vector(data);
-    v.zeros();
-    return v;
+    return Vector.fill(count, +0.0, type);
   };
 
   /**
    * Fills vector with 0
    */
   Vector.prototype.zeros = function() {
-    var length = this.length,
-        data = this.data,
-        k;
-    for (k = 0; k < length; k++)
-      data[k] = +0.0;
+    this.fill(+0.0);
     return this;
   };
 
@@ -230,28 +252,14 @@
    * @returns {Vector} a new vector of the specified size and `type`
    **/
   Vector.ones = function (count, type) {
-    if (count < 0)
-      throw new Error('invalid size');
-    else if (count === 0)
-      return new Vector();
-
-    type = type || Vector.defaultType;
-
-    var data = new type(count);
-    var v = new Vector(data);
-    v.ones();
-    return v;
+    return Vector.fill(count, +1.0, type);
   };
 
   /**
    * Fills vector with 1
    */
   Vector.prototype.ones = function() {
-    var length = this.length,
-        data = this.data,
-        k;
-    for (k = 0; k < length; k++)
-      data[k] = +1.0;
+    this.fill(+1.0);
     return this;
   };
 
