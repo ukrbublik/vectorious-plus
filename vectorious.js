@@ -172,7 +172,7 @@
     var r = isVector ? 1 : this.shape[0],
         c = isVector ? this.length : this.shape[1];
     var size1 = this.data.constructor.BYTES_PER_ELEMENT;
-    nblas.BufSet(this.data, 0, value, size1 * r * c);
+    nblas.MatrixOnes(this.data, r, c, value);
     return this;
   };
 
@@ -182,17 +182,6 @@
     nblas.MatrixDiagonal(this.data, r, c, val);
     return this;
   };
-
-  /*
-  Vector.prototype.ones = 
-  Matrix.prototype.ones = function() {
-    var isVector = (this instanceof Vector);
-    var r = isVector ? 1 : this.shape[0],
-        c = isVector ? this.length : this.shape[1];
-    nblas.MatrixOnes(this.data, r, c, 1.);
-    return this;
-  };
-  */
 
   module.exports.Vector = Vector;
   module.exports.Matrix = Matrix;
