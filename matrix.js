@@ -123,7 +123,19 @@
    * @returns {Matrix} `this`
    **/
   Matrix.prototype.add = function (matrix) {
-    return this.binOp(matrix, function(a, b) { return a + b });
+    var r = this.shape[0],          // rows in this matrix
+        c = this.shape[1],          // columns in this matrix
+        d1 = this.data,
+        d2 = matrix.data;
+
+    if (r !== matrix.shape[0] || c !== matrix.shape[1])
+      throw new Error('sizes do not match!');
+
+    var i;
+    for (i = 0; i < r * c; i++)
+      d1[i] += d2[i];
+
+    return this;
   };
 
   /**
@@ -143,7 +155,18 @@
    * @returns {Matrix} `this`
    **/
   Matrix.prototype.subtract = function (matrix) {
-    return this.binOp(matrix, function(a, b) { return a - b });
+      var r = this.shape[0],          // rows in this matrix
+          c = this.shape[1],          // columns in this matrix
+          d1 = this.data,
+          d2 = matrix.data;
+
+      if (r !== matrix.shape[0] || c !== matrix.shape[1])
+        throw new Error('sizes do not match');
+
+      var i;
+      for (i = 0; i < r * c; i++)
+        d1[i] -= d2[i];
+      return this;
   };
 
   /**
@@ -163,7 +186,19 @@
    * @returns {Matrix} `this`
    **/
   Matrix.prototype.product = function (matrix) {
-    return this.binOp(matrix, function(a, b) { return a * b });
+    if (this.shape[0] !== matrix.shape[0] || this.shape[1] !== matrix.shape[1])
+      return new Error('invalid size');
+
+    var r = this.shape[0],          // rows in this matrix
+        c = this.shape[1],          // columns in this matrix
+        d1 = this.data,
+        d2 = matrix.data,
+        i;
+
+    for (i = 0; i < r * c; i++)
+      d1[i] *= d2[i];
+
+    return this;
   }
 
   /**
