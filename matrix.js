@@ -74,6 +74,39 @@
   };
 
   /**
+   * Static method. Perform binary operation on two matrices `a` and `b` together.
+   * @param {Matrix} a
+   * @param {Matrix} b
+   * @param {function } op
+   * @returns {Matrix} a new matrix containing the results of binary operation of `a` and `b`
+   **/
+  Matrix.binOp = function(a, b, op) {
+    return new Matrix(a).binOp(b, op);
+  };
+
+  /**
+   * Perform binary operation on `matrix` to the current matrix.
+   * @param {Matrix} matrix
+   * @param {function } op
+   * @returns {Matrix} this
+   **/
+  Matrix.prototype.binOp = function(matrix, op) {
+    var r = this.shape[0],          // rows in this matrix
+        c = this.shape[1],          // columns in this matrix
+        d1 = this.data,
+        d2 = matrix.data;
+
+    if (r !== matrix.shape[0] || c !== matrix.shape[1])
+      throw new Error('sizes do not match!');
+
+    var i;
+    for (i = 0; i < r * c; i++)
+      d1[i] = op(d1[i], d2[i], i);
+
+    return this;
+  };
+
+  /**
    * Static method. Adds two matrices `a` and `b` together.
    * @param {Matrix} a
    * @param {Matrix} b
@@ -90,19 +123,7 @@
    * @returns {Matrix} `this`
    **/
   Matrix.prototype.add = function (matrix) {
-    var r = this.shape[0],          // rows in this matrix
-        c = this.shape[1],          // columns in this matrix
-        d1 = this.data,
-        d2 = matrix.data;
-
-    if (r !== matrix.shape[0] || c !== matrix.shape[1])
-      throw new Error('sizes do not match!');
-
-    var i, size = r * c;
-    for (i = 0; i < size; i++)
-      d1[i] += d2[i];
-
-    return this;
+    return this.binOp(matrix, function(a, b) { return a + b });
   };
 
   /**
@@ -122,20 +143,28 @@
    * @returns {Matrix} `this`
    **/
   Matrix.prototype.subtract = function (matrix) {
-      var r = this.shape[0],          // rows in this matrix
-          c = this.shape[1],          // columns in this matrix
-          d1 = this.data,
-          d2 = matrix.data;
-
-      if (r !== matrix.shape[0] || c !== matrix.shape[1])
-        throw new Error('sizes do not match');
-
-      var i, size = r * c;
-      for (i = 0; i < size; i++)
-        d1[i] -= d2[i];
-
-      return this;
+    return this.binOp(matrix, function(a, b) { return a - b });
   };
+
+  /**
+   * Static method. Hadamard product of matrices
+   * @param {Matrix} a
+   * @param {Matrix} b
+   * @returns {Matrix} a new matrix containing the hadamard product
+   **/
+  Matrix.product = function (a, b) {
+    return new Matrix(a).product(b);
+  };
+
+  /**
+   * Hadamard product of matrices
+   * @param {Matrix} a
+   * @param {Matrix} b
+   * @returns {Matrix} `this`
+   **/
+  Matrix.prototype.product = function (matrix) {
+    return this.binOp(matrix, function(a, b) { return a * b });
+  }
 
   /**
    * Static method. Multiplies all elements of a matrix `a` with a specified `scalar`.
@@ -166,35 +195,39 @@
   };
 
   /**
-   * Static method. Hadamard product of matrices
-   * @param {Matrix} a
-   * @param {Matrix} b
-   * @returns {Matrix} a new matrix containing the hadamard product
+   * Static method. Creates a `i x j` matrix containing optional 'value' (default 0), takes
+   * an optional `type` argument which should be an instance of `TypedArray`.
+   * @param {Number} i
+   * @param {Number} j
+   * @param {Number} value
+   * @param {TypedArray} type
+   * @returns {Vector} a new matrix of the specified size and `type`
    **/
-  Matrix.product = function (a, b) {
-    return new Matrix(a).product(b);
+  Matrix.fill = function (i, j, value, type) {
+    if (!(i > 0 && j > 0))
+      throw new Error('invalid size');
+
+    type = type || Matrix.defaultType;
+
+    var data = new type(i * j);
+    var m = Matrix.fromTypedArray(data, [i, j]);
+    m.fill(value);
+    return m;
   };
 
   /**
-   * Hadamard product of matrices
-   * @param {Matrix} a
-   * @param {Matrix} b
-   * @returns {Matrix} `this`
-   **/
-  Matrix.prototype.product = function (matrix) {
-    if (this.shape[0] !== matrix.shape[0] || this.shape[1] !== matrix.shape[1])
-      return new Error('invalid size');
-
-    var r = this.shape[0],          // rows in this matrix
-        c = this.shape[1],          // columns in this matrix
-        d1 = this.data,
-        d2 = matrix.data,
-        i, 
+   * Fills matrix with value
+   * @param {Number} value
+   */
+  Matrix.prototype.fill = function(value) {
+    value = value || +0.0;
+    var r = this.shape[0],
+        c = this.shape[1],
+        data = this.data,
+        k,
         size = r * c;
-
-    for (i = 0; i < size; i++)
-      d1[i] *= d2[i];
-
+    for (k = 0; k < size; k++)
+      data[k] = value;
     return this;
   };
 
@@ -207,29 +240,14 @@
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
   Matrix.zeros = function (i, j, type) {
-    if (!(i > 0 && j > 0))
-      throw new Error('invalid size');
-
-    type = type || Matrix.defaultType;
-
-    var data = new type(i * j);
-    var m = Matrix.fromTypedArray(data, [i, j]);
-    m.zeros();
-    return m;
+    return Matrix.fill(i, j, +0.0, type);
   };
 
   /**
    * Fills matrix with 0
    */
   Matrix.prototype.zeros = function() {
-    var r = this.shape[0],
-        c = this.shape[1],
-        data = this.data,
-        k,
-        size = r * c;
-    for (k = 0; k < size; k++)
-      data[k] = +0.0;
-    return this;
+    return this.fill(+0.0);
   };
 
   /**
@@ -241,29 +259,14 @@
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
   Matrix.ones = function (i, j, type) {
-    if (!(i > 0 && j > 0))
-      throw new Error('invalid size');
-
-    type = type || Matrix.defaultType;
-
-    var data = new type(i * j);
-    var m = Matrix.fromTypedArray(data, [i, j]);
-    m.ones();
-    return m;
+    return Matrix.fill(i, j, +1.0, type);
   };
 
   /**
    * Fills matrix with 1
    */
   Matrix.prototype.ones = function() {
-    var r = this.shape[0],
-        c = this.shape[1],
-        data = this.data,
-        k,
-        size = r * c;
-    for (k = 0; k < size; k++)
-      data[k] = +1.0;
-    return this;
+    return this.fill(+1.0);
   };
 
   /**

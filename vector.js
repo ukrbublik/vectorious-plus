@@ -56,6 +56,38 @@
   };
 
   /**
+   * Static method. Perform binary operation on two vectors `a` and `b` together.
+   * @param {Vector} a
+   * @param {Vector} b
+   * @param {function } op
+   * @returns {Vector} a vector containing the results of binaery operation of `a` and `b`
+   **/
+  Vector.binOp = function(a, b, op) {
+    return new Vector(a).binOp(b, op);
+  };
+
+  /**
+   * Perform binary operation on `vector` to the current vector.
+   * @param {Vector} vector
+   * @param {function } op
+   * @returns {Vector} this
+   **/
+  Vector.prototype.binOp = function(vector, op) {
+    var l1 = this.length,
+        l2 = vector.length;
+    if (l1 !== l2)
+      throw new Error('sizes do not match!');
+    if (!l1 && !l2)
+      return this;
+
+    var i;
+    for (i = 0; i < l1; i++)
+      this.data[i] = op(this.data[i], vector.data[i], i);
+
+    return this;
+  };
+
+  /**
    * Static method. Adds two vectors `a` and `b` together.
    * @param {Vector} a
    * @param {Vector} b
@@ -69,32 +101,9 @@
    * Adds `vector` to the current vector.
    * @param {Vector} vector
    * @returns {Vector} this
-  nblas.MatrixDiagonal = function(a, m, n, val) {
-    return typeCheck(a) ?
-      nblas.dMatrixDiagonal(m, n, a, val) :
-      nblas.sMatrixDiagonal(m, n, a, val);
-  };
-  nblas.MatrixOnes = function(a, val) {
-    if (val === undefined)
-      val = 1.;
-    return typeCheck(a) ?
-      nblas.dMatrixOnes(a, a.length, val) :
-      nblas.sMatrixOnes(a, a.length, val);
-  };
    **/
   Vector.prototype.add = function (vector) {
-    var l1 = this.length,
-        l2 = vector.length;
-    if (l1 !== l2)
-      throw new Error('sizes do not match!');
-    if (!l1 && !l2)
-      return this;
-
-    var i;
-    for (i = 0; i < l1; i++)
-      this.data[i] += vector.data[i];
-
-    return this;
+    return this.binOp(vector, function(a, b) { return a + b });
   };
 
   /**
@@ -113,19 +122,7 @@
    * @returns {Vector} this
    **/
   Vector.prototype.subtract = function (vector) {
-    var l1 = this.length,
-        l2 = vector.length;
-    if (l1 !== l2)
-      throw new Error('sizes do not match');
-
-    if (!l1 && !l2)
-      return this;
-
-    var i;
-    for (i = 0; i < l1; i++)
-      this.data[i] -= vector.data[i];
-
-    return this;
+    return this.binOp(vector, function(a, b) { return a - b });
   };
 
   /**
@@ -240,8 +237,7 @@
    * Fills vector with 0
    */
   Vector.prototype.zeros = function() {
-    this.fill(+0.0);
-    return this;
+    return this.fill(+0.0);
   };
 
   /**
@@ -259,8 +255,7 @@
    * Fills vector with 1
    */
   Vector.prototype.ones = function() {
-    this.fill(+1.0);
-    return this;
+    return this.fill(+1.0);
   };
 
   /**
@@ -535,18 +530,9 @@
    * @returns {Number} the smallest element of the current vector
    **/
   Vector.prototype.min = function () {
-    var min = Number.POSITIVE_INFINITY,
-        data = this.data,
-        value,
-        i, l;
-
-    for (i = 0, l = data.length; i < l; i++) {
-      value = data[i];
-      if (value < min)
-        min = value;
-    }
-
-    return min;
+    return this.reduce(function(acc, item) {
+      return Math.min(acc, item);
+    }, Number.POSITIVE_INFINITY);
   };
 
   /**
@@ -554,18 +540,9 @@
    * @returns {Number} the largest element of current vector
    **/
   Vector.prototype.max = function () {
-    var max = Number.NEGATIVE_INFINITY,
-        data = this.data,
-        value,
-        i, l;
-
-    for (i = 0, l = this.length; i < l; i++) {
-      value = data[i];
-      if (value > max)
-        max = value;
-    }
-
-    return max;
+    return this.reduce(function(acc, item) {
+      return Math.max(acc, item);
+    }, Number.NEGATIVE_INFINITY);
   };
 
   /**
@@ -722,12 +699,14 @@
    * @returns {String} a string of the vector's contents
    **/
   Vector.prototype.toString = function () {
-    var result = '',
+    var result = ['['],
         i;
     for (i = 0; i < this.length; i++)
-      result += i > 0 ? ', ' + this.data[i] : this.data[i];
+      result.push(i > 0 ? ', ' + this.data[i] : this.data[i]);
 
-    return '[' + result + ']';
+    result.push(']');
+
+    return result.join('');
   };
 
   /**
