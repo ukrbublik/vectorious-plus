@@ -1042,15 +1042,23 @@
   };
 
   /**
+   * Check pair row `i`, column `j` for current matrix
+   * @param {Number} i
+   * @param {Number} j
+   **/
+  Matrix.prototype.checkIndex = function (i, j) {  
+    if (i < 0 || j < 0 || i > this.shape[0] - 1 || j > this.shape[1] - 1)
+      throw new Error('index out of bounds');
+  }
+
+  /**
    * Gets the value of the element in row `i`, column `j` of current matrix
    * @param {Number} i
    * @param {Number} j
    * @returns {Number} the element at row `i`, column `j` of current matrix
    **/
   Matrix.prototype.get = function (i, j) {
-    if (i < 0 || j < 0 || i > this.shape[0] - 1 || j > this.shape[1] - 1)
-      throw new Error('index out of bounds');
-
+    this.checkIndex(i, j);
     return this.data[i * this.shape[1] + j];
   };
 
@@ -1062,8 +1070,7 @@
    * @returns {Matrix} `this`
    **/
   Matrix.prototype.set = function (i, j, value) {
-    if (i < 0 || j < 0 || i > this.shape[0] - 1 || j > this.shape[1] - 1)
-      throw new Error('index out of bounds');
+    this.checkIndex(i, j);
 
     this.data[i * this.shape[1] + j] = value;
     return this;
@@ -1115,8 +1122,7 @@
    * @returns {Matrix} `this`
    **/
   Matrix.prototype.swap = function (i, j) {
-    if (i < 0 || j < 0 || i > this.shape[0] - 1 || j > this.shape[0] - 1)
-      throw new Error('index out of bounds');
+    this.checkIndex(i, j);
 
     var c = this.shape[1];
 
