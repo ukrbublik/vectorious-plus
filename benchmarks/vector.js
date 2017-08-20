@@ -12,6 +12,9 @@
   console.log('a, b = Vector.random(' + N + ')');
   
   suite
+    .add('Vector.random(' + N + ')', function () { Vector.random(N); })
+    .add('Vector.randomNormal(' + N + ', 1, 0)', function () { Vector.randomNormal(N, 1.0, 0.0, 'Marsaglia'); })
+    .add('Vector.randomNormal(' + N + ', 1, 0, "BoxMuller")', function () { Vector.randomNormal(N, 1.0, 0.0, 'BoxMuller'); })
     .add('Vector.zeros(' + N + ')', function () { Vector.zeros(N); })
     .add('Vector.ones(' + N + ')', function () { Vector.ones(N); })
     .add('Vector.range(0, ' + N + ')', function () { Vector.range(0, N); })

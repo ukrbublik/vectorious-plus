@@ -166,9 +166,13 @@
     return this;
   };
 
+  var origVectorFill = Vector.prototype.fill;
+  var origMatrixFill = Matrix.prototype.fill;
   Vector.prototype.fill =
   Matrix.prototype.fill = function(value) {
     var isVector = (this instanceof Vector);
+    if (typeof value == 'function')
+        return (isVector ? origVectorFill : origMatrixFill).call(this, value);
     var r = isVector ? 1 : this.shape[0],
         c = isVector ? this.length : this.shape[1];
     var size1 = this.data.constructor.BYTES_PER_ELEMENT;

@@ -234,7 +234,7 @@
    * an optional `type` argument which should be an instance of `TypedArray`.
    * @param {Number} i
    * @param {Number} j
-   * @param {Number} value
+   * @param {Number || function} value
    * @param {TypedArray} type
    * @returns {Vector} a new matrix of the specified size and `type`
    **/
@@ -252,17 +252,20 @@
 
   /**
    * Fills matrix with value
-   * @param {Number} value
+   * @param {Number || function} value
    */
   Matrix.prototype.fill = function(value) {
     value = value || +0.0;
     var r = this.shape[0],
         c = this.shape[1],
         data = this.data,
-        k,
-        size = r * c;
-    for (k = 0; k < size; k++)
-      data[k] = value;
+        isValueFn = typeof value === 'function',
+        k, i, j;
+
+    for (i = 0; i < r; i++)
+      for (j = 0; j < c; j++, k++)
+        data[k] = isValueFn ? value(i, j) : value;
+
     return this;
   };
 
@@ -409,14 +412,15 @@
    * @param {Number} j
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
+   * @param {string} method ('Marsaglia', 'BoxMuller') (default 'Marsaglia')
    * @param {TypedArray} type
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
-  Matrix.randomNormal = function (i, j, deviation, mean, type) {
+  Matrix.randomNormal = function (i, j, deviation, mean, method, type) {
     type = type || Matrix.defaultType;
     var data = new type(i * j);
     var m = Matrix.fromTypedArray(data, [i, j]);
-    m.randomNormal(deviation, mean);
+    m.randomNormal(deviation, mean, method);
     return m;
   };
 
@@ -425,16 +429,23 @@
    * https://en.wikipedia.org/wiki/Normal_distribution
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
+   * @param {string} method ('Marsaglia', 'BoxMuller') (default 'Marsaglia')
    **/
-  Matrix.prototype.randomNormal = function(deviation, mean) {
-    this._randomNormal1(deviation, mean);
-    //this._randomNormal2(deviation, mean);
+  Matrix.prototype.randomNormal = function(deviation, mean, method) {
+    const methods = {
+      'Marsaglia': 'randomNormal_Marsaglia',
+      'BoxMuller': 'randomNormal_BoxMuller',
+    };
+    if (!method || !methods[method])
+      method = 'Marsaglia';
+    let randomFn = Matrix.prototype[methods[method]];
+    randomFn.call(this, deviation, mean);
     return this;
   }
 
   //Uses Box–Muller method
   //https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-  Matrix.prototype._randomNormal1 = function(deviation, mean) {
+  Matrix.prototype.randomNormal_BoxMuller = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
     var size = this.shape[0] * this.shape[1];
@@ -462,9 +473,9 @@
     } while(k < size);
   };
 
-  //Uses Marsaglia polar method
+  //Uses Marsaglia polar method (faster than Box–Muller's method)
   //https://en.wikipedia.org/wiki/Marsaglia_polar_method
-  Matrix._randomNormal2 = function(deviation, mean) {
+  Matrix.prototype.randomNormal_Marsaglia = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
     var size = this.shape[0] * this.shape[1];

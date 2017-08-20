@@ -211,7 +211,7 @@
    * Static method. Creates a vector containing optional 'value' (default 0) of `count` size, takes
    * an optional `type` argument which should be an instance of `TypedArray`.
    * @param {Number} count
-   * @param {Number} value
+   * @param {Number || function} value
    * @param {TypedArray} type
    * @returns {Vector} a new vector of the specified size and `type`
    **/
@@ -231,15 +231,16 @@
   
   /**
    * Fills vector with value
-   * @param {Number} value
+   * @param {Number || function} value
    */
   Vector.prototype.fill = function(value) {
     value = value || +0.0;
     var length = this.length,
         data = this.data,
+        isValueFn = (typeof value === 'function'),
         k;
     for (k = 0; k < length; k++)
-      data[k] = value;
+      data[k] = isValueFn ? value(k) : value;
     return this;
   };
 
@@ -362,14 +363,15 @@
    * @param {Number} count
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
+   * @param {string} method ('Marsaglia', 'BoxMuller') (default 'Marsaglia')
    * @param {TypedArray} type
    * @returns {Vector} a new vector of the specified size and `type`
    **/
-  Vector.randomNormal = function (count, deviation, mean, type) {
+  Vector.randomNormal = function (count, deviation, mean, method, type) {
     type = type || Vector.defaultType;
     var data = new type(count);
     var v = new Vector(data);
-    v.randomNormal(deviation, mean);
+    v.randomNormal(deviation, mean, method);
     return v;
   };
 
@@ -378,16 +380,23 @@
    * https://en.wikipedia.org/wiki/Normal_distribution
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
+   * @param {string} method ('Marsaglia', 'BoxMuller') (default 'Marsaglia')
    **/
-  Vector.prototype.randomNormal = function (deviation, mean) {
-    this._randomNormal1(deviation, mean);
-    //this._randomNormal2(deviation, mean);
+  Vector.prototype.randomNormal = function (deviation, mean, method) {
+    const methods = {
+      'Marsaglia': 'randomNormal_Marsaglia',
+      'BoxMuller': 'randomNormal_BoxMuller',
+    };
+    if (!method || !methods[method])
+      method = 'Marsaglia';
+    let randomFn = Vector.prototype[methods[method]];
+    randomFn.call(this, deviation, mean);
     return this;
   };
 
-  //Uses Box–Muller method
+  //Uses Box–Muller transform method
   //https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-  Vector.prototype._randomNormal1 = function(deviation, mean) {
+  Vector.prototype.randomNormal_BoxMuller = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
     var data = this.data,
@@ -412,9 +421,9 @@
     }
   };
 
-  //Uses Marsaglia polar method
+  //Uses Marsaglia polar method (faster than Box–Muller's method)
   //https://en.wikipedia.org/wiki/Marsaglia_polar_method
-  Vector.prototype._randomNormal2 = function(deviation, mean) {
+  Vector.prototype.randomNormal_Marsaglia = function(deviation, mean) {
     deviation = deviation || 1.0;
     mean = mean || 0.0;
     var data = this.data,
