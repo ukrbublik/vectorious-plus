@@ -6,30 +6,29 @@
    * @desc Creates a two-dimensional `Vector` from the supplied arguments.
    **/
   function Vector (data, options) {
+    this.length = 0;
     this.type = Vector.defaultType;
+
+    if (options && options.length)
+      this.length = options.length;
     if (options && options.type)
       this.type = options.type;
-    this.length = 0;
 
     if (data instanceof Vector) {
       //copy
       this.combine(data);
     } else if (data && data.shape) {
       //convert from Matrix
-      this.data = new data.type(data.data);
-      this.length = data.shape[0] * data.shape[1];
-      this.type = data.type;
+      return Vector.fromMatrix(data);
     } else if (data instanceof Array) {
       //convert to typed array
-      this.data = new this.type(data);
-      this.length = data.length;
+      return Vector.fromArray(data, this.type);
     } else if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
       //assign
       return Vector.fromTypedArray(data, options && options.length ? options.length : data.length);
-    } else if(!data && options && options.length > 0) {
+    } else if(this.length && this.length > 0) {
       //create empty
-      this.length = options.length;
-      this.data = new this.type(options.length);
+      return Vector.fromLength(this.length, this.type);
     }
   }
 
@@ -54,6 +53,39 @@
 
     return self;
   };
+
+  /**
+   *
+   **/
+  Vector.fromMatrix = function (matrix) {
+    var self = Object.create(Vector.prototype);
+    self.data = new matrix.type(matrix.data);
+    self.length = matrix.shape[0] * matrix.shape[1];
+    self.type = matrix.type;
+    
+    return self;
+  }
+
+  /**
+   *
+   **/
+  Vector.fromArray = function (array, type) {
+    type = type || Vector.defaultType;
+    var self = Object.create(Vector.prototype);
+    self.data = new type(array);
+    self.length = array.length;
+    self.type = type;
+
+    return self;
+  };
+
+  /**
+   *
+   **/
+  Vector.fromLength = function (length, type) {
+    type = type || Vector.defaultType;
+    return Vector.fromTypedArray(new type(length), length);
+  }
 
   /**
    * Static method. Perform binary operation on two vectors `a` and `b` together.

@@ -8,31 +8,40 @@
    * @desc Creates a `Matrix` from the supplied arguments.
    **/
   function Matrix (data, options) {
+    this.shape = [];
     this.type = Matrix.defaultType;
+
+    if (data && !data.buffer && !data.data && data.shape) {
+      // Handle new Matrix({ shape: [r, c] })
+      options = data;
+      data = null;
+    } else if (typeof data === "number" && typeof options === "number") {
+      // Handle new Matrix(r, c)
+      this.shape = [data, options];
+      data = options = null;
+    }
+
+    if (options && options.shape)
+      this.shape = options.shape;
     if (options && options.type)
       this.type = options.type;
-    this.shape = [];
 
     if (data && data.buffer && data.buffer instanceof ArrayBuffer) {
       //assign
-      return Matrix.fromTypedArray(data, options.shape);
+      return Matrix.fromTypedArray(data, options && options.shape);
     } else if (data instanceof Array) {
       //convert to typed array
       return Matrix.fromArray(data, this.type);
     } else if (data instanceof Vector) {
       //copy
       this.shape = options && options.shape ? options.shape : [data.length, 1];
-      this.data = new data.type(data.data);
-      this.type = data.type;
+      return Matrix.fromVector(data, this.shape);
     } else if (data instanceof Matrix) {
       //copy
-      this.shape = [data.shape[0], data.shape[1]];
-      this.data = new data.type(data.data);
-      this.type = data.type;
-    } else if(!data && options && options.shape) {
+      return Matrix.fromMatrix(data);
+    } else if (this.shape && this.shape.length == 2) {
       //create empty
-      this.shape = options.shape;
-      this.data = new this.type(options.shape[0] * options.shape[1]);
+      return Matrix.fromShape(this.shape, this.type);
     }
   }
 
@@ -72,6 +81,44 @@
 
     return Matrix.fromTypedArray(data, [r, c]);
   };
+
+  /**
+   *
+   **/
+  Matrix.fromMatrix = function (matrix) {
+    var self = Object.create(Matrix.prototype);
+    self.shape = [matrix.shape[0], matrix.shape[1]];
+    self.data = new matrix.type(matrix.data);
+    self.type = matrix.type;
+    
+    return self;
+  }
+  
+  /**
+   *
+   **/
+  Matrix.fromVector = function (vector, shape) {
+    if (shape && vector.length !== shape[0] * shape[1])
+      throw new Error("Shape does not match vector dimensions.");
+
+    var self = Object.create(Matrix.prototype);
+    self.shape = shape ? shape : [vector.length, 1];
+    self.data = new vector.type(vector.data);
+    self.type = vector.type;
+
+    return self;
+  }
+
+  /**
+   *
+   **/
+  Matrix.fromShape = function (shape, type) {
+    type = type || Matrix.defaultType;
+    var r = shape[0], // number of rows
+        c = shape[1]; // number of columns
+
+    return Matrix.fromTypedArray(new type(r * c), shape);
+  }
 
   /**
    * Static method. Perform binary operation on two matrices `a` and `b` together.
