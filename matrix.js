@@ -230,22 +230,22 @@
   };
 
   /**
-   * Static method. Creates a `i x j` matrix containing optional 'value' (default 0), takes
+   * Static method. Creates a `r x c` matrix containing optional 'value' (default 0), takes
    * an optional `type` argument which should be an instance of `TypedArray`.
-   * @param {Number} i
-   * @param {Number} j
+   * @param {Number} r
+   * @param {Number} c
    * @param {Number || function} value
    * @param {TypedArray} type
    * @returns {Vector} a new matrix of the specified size and `type`
    **/
-  Matrix.fill = function (i, j, value, type) {
-    if (!(i > 0 && j > 0))
+  Matrix.fill = function (r, c, value, type) {
+    if (!(r > 0 && c > 0))
       throw new Error('invalid size');
 
     type = type || Matrix.defaultType;
 
-    var data = new type(i * j);
-    var m = Matrix.fromTypedArray(data, [i, j]);
+    var data = new type(r * c);
+    var m = Matrix.fromTypedArray(data, [r, c]);
     m.fill(value);
     return m;
   };
@@ -260,7 +260,7 @@
         c = this.shape[1],
         data = this.data,
         isValueFn = typeof value === 'function',
-        k, i, j;
+        i, j, k = 0;
 
     for (i = 0; i < r; i++)
       for (j = 0; j < c; j++, k++)
@@ -270,15 +270,15 @@
   };
 
   /**
-   * Static method. Creates an `i x j` matrix containing zeros (`0`), takes an
+   * Static method. Creates an `r x c` matrix containing zeros (`0`), takes an
    * optional `type` argument which should be an instance of `TypedArray`.
-   * @param {Number} i
-   * @param {Number} j
+   * @param {Number} r
+   * @param {Number} c
    * @param {TypedArray} type
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
-  Matrix.zeros = function (i, j, type) {
-    return Matrix.fill(i, j, +0.0, type);
+  Matrix.zeros = function (r, c, type) {
+    return Matrix.fill(r, c, +0.0, type);
   };
 
   /**
@@ -289,15 +289,15 @@
   };
 
   /**
-   * Static method. Creates an `i x j` matrix containing ones (`1`), takes an
+   * Static method. Creates an `r x c` matrix containing ones (`1`), takes an
    * optional `type` argument which should be an instance of `TypedArray`.
-   * @param {Number} i
-   * @param {Number} j
+   * @param {Number} r
+   * @param {Number} c
    * @param {TypedArray} type
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
-  Matrix.ones = function (i, j, type) {
-    return Matrix.fill(i, j, +1.0, type);
+  Matrix.ones = function (r, c, type) {
+    return Matrix.fill(r, c, +1.0, type);
   };
 
   /**
@@ -380,46 +380,46 @@
   };
 
   /**
-   * Static method. Creates an `i x j` matrix containing random values
+   * Static method. Creates an `r x c` matrix containing random values
    * according to a normal distribution, takes an optional `type` argument
    * which should be an instance of `TypedArray`.
-   * @param {Number} i
-   * @param {Number} j
+   * @param {Number} r
+   * @param {Number} c
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
    * @param {TypedArray} type
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
-  Matrix.random = function (i, j, deviation, mean, type) {
+  Matrix.random = function (r, c, deviation, mean, type) {
     deviation = deviation || 1;
     mean = mean || 0;
     type = type || Matrix.defaultType;
-    var data = new type(i * j),
+    var data = new type(r * c),
         k,
-        size = i * j;
+        size = r * c;
 
     for (k = 0; k < size; k++)
       data[k] = deviation * Math.random() + mean;
 
-    return Matrix.fromTypedArray(data, [i, j]);
+    return Matrix.fromTypedArray(data, [r, c]);
   };
 
   /**
-   * Static method. Creates an `i x j` matrix containing random values
+   * Static method. Creates an `r x c` matrix containing random values
    * according to a normal (Gaussian) distribution, takes an optional `type` argument
    * which should be an instance of `TypedArray`.
-   * @param {Number} i
-   * @param {Number} j
+   * @param {Number} r
+   * @param {Number} c
    * @param {Number} deviation (default 1)
    * @param {Number} mean (default 0)
    * @param {string} method ('Marsaglia', 'BoxMuller') (default 'Marsaglia')
    * @param {TypedArray} type
    * @returns {Matrix} a matrix of the specified dimensions and `type`
    **/
-  Matrix.randomNormal = function (i, j, deviation, mean, method, type) {
+  Matrix.randomNormal = function (r, c, deviation, mean, method, type) {
     type = type || Matrix.defaultType;
-    var data = new type(i * j);
-    var m = Matrix.fromTypedArray(data, [i, j]);
+    var data = new type(r * c);
+    var m = Matrix.fromTypedArray(data, [r, c]);
     m.randomNormal(deviation, mean, method);
     return m;
   };
