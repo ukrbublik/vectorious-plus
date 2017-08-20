@@ -93,6 +93,7 @@
   Matrix.prototype.binOp = function(matrix, op) {
     var r = this.shape[0],          // rows in this matrix
         c = this.shape[1],          // columns in this matrix
+        size = r * c,
         d1 = this.data,
         d2 = matrix.data;
 
@@ -100,7 +101,7 @@
       throw new Error('sizes do not match!');
 
     var i;
-    for (i = 0; i < r * c; i++)
+    for (i = 0; i < size; i++)
       d1[i] = op(d1[i], d2[i], i);
 
     return this;
@@ -125,6 +126,7 @@
   Matrix.prototype.add = function (matrix) {
     var r = this.shape[0],          // rows in this matrix
         c = this.shape[1],          // columns in this matrix
+        size = r * c,
         d1 = this.data,
         d2 = matrix.data;
 
@@ -132,7 +134,7 @@
       throw new Error('sizes do not match!');
 
     var i;
-    for (i = 0; i < r * c; i++)
+    for (i = 0; i < size; i++)
       d1[i] += d2[i];
 
     return this;
@@ -157,6 +159,7 @@
   Matrix.prototype.subtract = function (matrix) {
       var r = this.shape[0],          // rows in this matrix
           c = this.shape[1],          // columns in this matrix
+          size = r * c,
           d1 = this.data,
           d2 = matrix.data;
 
@@ -164,7 +167,7 @@
         throw new Error('sizes do not match');
 
       var i;
-      for (i = 0; i < r * c; i++)
+      for (i = 0; i < size; i++)
         d1[i] -= d2[i];
       return this;
   };
@@ -191,11 +194,12 @@
 
     var r = this.shape[0],          // rows in this matrix
         c = this.shape[1],          // columns in this matrix
+        size = r * c,
         d1 = this.data,
         d2 = matrix.data,
         i;
 
-    for (i = 0; i < r * c; i++)
+    for (i = 0; i < size; i++)
       d1[i] *= d2[i];
 
     return this;
