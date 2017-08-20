@@ -31,6 +31,7 @@
     .add('a.magnitude()', function () { a.magnitude(); })
     .add('a.angle(b)', function () { a.angle(b); })
     .add('a.project(b)', function () { a.project(b); })
+    .add('Vector.random(' + N + ').min()', function () { Vector.random(N).min(); })
     .on('cycle', function (event) { console.log(String(event.target)); })
     .run();
 }());
