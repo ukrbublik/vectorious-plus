@@ -1186,14 +1186,14 @@
    **/
   Matrix.prototype.reduce = function (callback, initialValue) {
     var r = this.shape[0],
-        c = this.shape[1];
+        c = this.shape[1],
+        size = r * c;
 
-    if (r * c === 0 && !initialValue)
+    if (size === 0 && !initialValue)
       throw new Error('Reduce of empty matrix with no initial value.');
 
     var i = 0,
-        value = initialValue || this.data[i++], 
-        size = r * c;
+        value = initialValue || this.data[i++];
 
     for (; i < size; i++)
       value = callback.call(this, value, this.data[i], i / c | 0, i % c);

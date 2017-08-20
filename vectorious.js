@@ -176,7 +176,7 @@
     var r = isVector ? 1 : this.shape[0],
         c = isVector ? this.length : this.shape[1];
     var size1 = this.data.constructor.BYTES_PER_ELEMENT;
-    nblas.MatrixOnes(this.data, r, c, value);
+    nblas.MatrixFill(this.data, r, c, value);
     return this;
   };
 
