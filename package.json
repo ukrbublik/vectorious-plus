@@ -24,9 +24,14 @@
     "LAPACK"
   ],
   "author": "Mateo Gianolio",
-  "contributors": [
-    "ukrbubik"
-  ],
+   "contributors": [
+     "Bart van Andel <bavanandel@gmail.com>",
+     "James Vickers",
+     "Phillip Wang",
+     "Waylon Flinn",
+     "Xuefeng Zhu",
+     "ukrbubik <ukrbubik@gmail.com>"
+   ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ukrbublik/vectorious-plus/issues"
