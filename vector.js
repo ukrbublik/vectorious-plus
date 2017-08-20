@@ -558,7 +558,7 @@
    * @returns {Number} the element at `index`
    **/
   Vector.prototype.get = function (index) {
-    this.check(index);
+    this.checkIndex(index);
     return this.data[index];
   };
 
@@ -589,7 +589,7 @@
    * @returns {Vector} this
    **/
   Vector.prototype.set = function (index, value) {
-    this.check(index);
+    this.checkIndex(index);
     this.data[index] = value;
     return this;
   };

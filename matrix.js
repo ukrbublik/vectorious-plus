@@ -1122,7 +1122,8 @@
    * @returns {Matrix} `this`
    **/
   Matrix.prototype.swap = function (i, j) {
-    this.checkIndex(i, j);
+    if (i < 0 || j < 0 || i > this.shape[0] - 1 || j > this.shape[0] - 1)
+      throw new Error('index out of bounds');
 
     var c = this.shape[1];
 
